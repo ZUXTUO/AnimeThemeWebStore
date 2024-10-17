@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录界面</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            user-select: none;
+        }
+        .bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('img/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            filter: blur(10px);
+            transform: scale(1.1);
+            transition: filter 2s ease-in-out, transform 2s ease-in-out;
+        }
+        .bg.clear {
+            filter: blur(0);
+            transform: scale(1);
+        }
+        .leaf {
+            position: absolute;
+            animation: fall 5s linear infinite;
+            opacity: 0;
+            animation-fill-mode: forwards;
+        }
+        @keyframes fall {
+            0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+            10% { opacity: 1; }
+            50% { transform: translate(50vw, 30vh) rotate(180deg); }
+            100% { transform: translate(100vw, 100vh) rotate(360deg); opacity: 0; }
+        }
+        .text {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            color: white;
+            text-shadow: 0 0 10px pink, 0 0 20px pink;
+            display: flex;
+            justify-content: space-between;
+            height: 650px;
+            gap: 50px;
+            opacity: 1;
+            transition: opacity 1s ease;
+        }
+        .line {
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .line span {
+            display: block;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+        }
+        .login-box {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            width: 300px;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        .login-box.show {
+            opacity: 1;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .login-box button {
+            width: 48%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .login-box button.login {
+            background-color: #5cb85c;
+        }
+        .login-box button.login:hover {
+            background-color: #4cae4c;
+        }
+        .login-box button.register {
+            background-color: #007bff;
+        }
+        .login-box button.register:hover {
+            background-color: #0056b3;
+        }
+        .login-box .forgot-password {
+            font-size: 12px;
+            text-decoration: underline;
+            color: #007bff;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .notification {
+            position: fixed;
+            left: 50%;
+            bottom: 20px;
+            transform: translateX(-50%);
+            background-color: #5cb85c;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            display: none;
+        }
+        .footer {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            text-shadow: 0 0 10px black;
+            font-size: 14px;
+        }
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #playMusic {
+            animation: rotate 5s linear infinite;
+            position: absolute; /* 确保仍然是绝对定位 */
+            top: 20px; /* 保持上边距 */
+            right: 20px; /* 改为右边距 */
+        }
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: green;
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            z-index: 1000;
+        }
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+        }
+    </style>
+    </style>
+</head>
+<body>
+    <div class="bg" id="background"></div>
+    <div class="text" id="message">
+        <div class="line"><span>时</span><span>光</span><span>流</span><span>转</span></div>
+        <div class="line"><span>愿</span><span>君</span><span>与</span><span>珍</span><span>爱</span><span>之</span><span>人</span></div>
+        <div class="line"><span>再</span><span>度</span><span>重</span><span>逢</span></div>
+    </div>
+    <button id="skipBtn" style="position: absolute; top: 20px; left: 20px; background-color: pink; border: none; padding: 10px 15px; cursor: pointer; z-index: 10;">跳过</button>
+    <div class="login-box" id="loginBox">
+        <input type="text" id="username" placeholder="请输入账号ID" required>
+        <input type="password" id="password" placeholder="请输入ID密码" required>
+        <div style="display: flex; justify-content: space-between;">
+            <button class="login" id="loginBtn">登录</button>
+            <button class="register" id="registerBtn" onclick="location.href='register.html'">注册</button>
+        </div>
+        <a href="#" class="forgot-password">找回密码</a>
+    </div>
+    <img id="playMusic" src="img/music.png" alt="播放音乐" style="position: absolute; top: 20px; right: 20px; width: 50px;">
+    <audio id="backgroundMusic" src="bgm/bg.ogg" autoplay loop></audio>
+    <div class="notification" id="notification"></div>
+    <div class="overlay" id="overlay"></div>
+    <div class="popup" id="popup">请联系管理员<br>QQ:XXXXX</div>
+    <div class="footer">Made by ZUXTUO</div>
+    
+    <script>
+        window.onload = function() {
+            document.getElementById('background').classList.add('clear');
+            createLeaves(10);
+            setTimeout(showMessage, 2000);
+        };
+    
+        function createLeaves(count) {
+            const container = document.body;
+            for (let i = 0; i < count; i++) {
+                const leaf = document.createElement('img');
+                leaf.src = 'img/ye.png';
+                leaf.className = 'leaf';
+                const size = Math.random() * 20 + 20;
+                leaf.style.width = size + 'px';
+                leaf.style.left = Math.random() * 80 + 'vw';
+                leaf.style.top = Math.random() * 80 + 'vh';
+                leaf.style.animationDelay = Math.random() * 10 + 's';
+                container.appendChild(leaf);
+            }
+        }
+    
+        function showMessage() {
+            const lines = document.querySelectorAll('.line');
+            lines.forEach((line, lineIndex) => {
+                line.style.opacity = 1;
+                const spans = line.querySelectorAll('span');
+                spans.forEach((span, index) => {
+                    setTimeout(() => {
+                        span.style.opacity = 1;
+                    }, index * 500 + lineIndex * 2000);
+                });
+            });
+            setTimeout(() => {
+                lines.forEach(line => {
+                    line.style.opacity = 0;
+                    line.style.transition = 'opacity 1s ease';
+                });
+                showLoginBox();
+            }, 7000);
+        }
+    
+        function showLoginBox() {
+            const loginBox = document.getElementById('loginBox');
+            loginBox.classList.add('show');
+            document.getElementById('skipBtn').style.display = 'none'; // Hide the skip button
+        }
+    
+        document.getElementById('skipBtn').addEventListener('click', function() {
+            // Skip the message and show the login box immediately
+            const lines = document.querySelectorAll('.line');
+            lines.forEach(line => {
+                line.style.opacity = 0; // Hide all lines
+            });
+            showLoginBox(); // Show the login box
+        });
+    
+        document.getElementById('loginBtn').addEventListener('click', function(event) {
+            event.preventDefault(); // 阻止表单默认提交
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            fetch('./php/login.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(data);
+                    showNotification('登录成功', true);
+                    window.location.href = 'user.html';
+                } else {
+                    showNotification('登录失败: ' + data.message, false);
+                }
+            })
+            .catch(error => {
+                console.error('错误:', error);
+                showNotification('发生错误，请重试', false);
+            });
+        });
+    
+        function showNotification(message, success) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.backgroundColor = success ? '#5cb85c' : '#d9534f';
+            notification.style.display = 'block';
+            notification.style.opacity = 1;
+            setTimeout(() => {
+                notification.style.opacity = 0;
+                setTimeout(() => {
+                    notification.style.display = 'none';
+                }, 500);
+            }, 5000);
+        }
+    
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('touchstart', event => {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+    
+        const backgroundMusic = document.getElementById('backgroundMusic');
+        const playMusicButton = document.getElementById('playMusic');
+    
+        playMusicButton.addEventListener('click', function() {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play();
+                playMusicButton.textContent = '关闭音乐'; // 更改按钮文本为关闭
+            } else {
+                backgroundMusic.pause();
+                playMusicButton.textContent = '播放音乐'; // 更改按钮文本为播放
+            }
+        });
+
+        const forgotPasswordLink = document.querySelector('.forgot-password');
+        const popup = document.getElementById('popup');
+        const overlay = document.getElementById('overlay');
+
+        forgotPasswordLink.addEventListener('click', function(event) {
+            event.preventDefault(); // 防止链接的默认行为
+            popup.style.display = 'block';
+            overlay.style.display = 'block';
+        });
+
+        overlay.addEventListener('click', function() {
+            popup.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+    </script>
+</body>
+</html> 

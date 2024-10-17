@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商家页面</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-image: url('img/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        #merchant-info {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        #merchant-icon {
+            width: 80px;
+            height: 80px;
+            margin-right: 15px;
+            object-fit: contain; /* 保持比例，不拉伸 */
+        }
+
+        #merchant-name {
+            flex-grow: 1;
+            font-size: 1.5em;
+            color: #333;
+        }
+        #product-container {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            height: calc(100vh - 80px - 60px - 65px);
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        .product-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 320px;
+        }
+        img {
+            max-width: 100%;
+            max-height: 60%;
+            height: auto;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        h1 {
+            font-size: 1.2em;
+            margin: 5px 0;
+            color: #333;
+        }
+        .description {
+            font-size: 0.9em;
+            color: #555;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+        .price {
+            font-size: 1.8em;
+            color: #e74c3c;
+            margin: 5px 0;
+        }
+        #footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .footer-button {
+            padding: 12px;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+        }
+        .footer-button:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        @media (max-width: 600px) {
+            .product-card {
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="merchant-info">
+        <img id="merchant-icon" src="commodity/temp.jpg" alt="商家头像">
+        <h1 id="merchant-name">加载商家信息...</h1>
+    </div>
+    <div id="product-container"></div>
+    <div id="footer">
+        <div class="footer-button" onclick="location.href='index.html'">主页</div>
+        <div class="footer-button" onclick="location.href='cart.html'">购物车</div>
+        <div class="footer-button" onclick="location.href='user.html'">我的</div>
+    </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const merchantId = urlParams.get('id');
+
+        if (merchantId) {
+            // 获取商家名称和商品信息
+            fetch(`./php/getMerchantName.php?id=${merchantId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        document.getElementById('merchant-name').textContent = data.error;
+                    } else {
+                        document.getElementById('merchant-name').textContent = data.name;
+                        const merchantIcon = document.getElementById('merchant-icon');
+                        merchantIcon.src = `commodity/${merchantId}/icon.jpg`;
+
+                        // 检查头像文件是否存在
+                        const img = new Image();
+                        img.src = merchantIcon.src;
+                        img.onload = () => {
+                            console.log("头像加载成功");
+                            merchantIcon.style.opacity = 1; // 显示头像
+                        };
+                        img.onerror = () => {
+                            console.error("头像加载失败，使用默认头像");
+                            merchantIcon.src = 'commodity/temp.jpg'; // 备用头像
+                            merchantIcon.style.opacity = 1; // 确保备用头像可见
+                        };
+                    }
+                })
+                .catch(error => console.error('获取商家名称失败:', error));
+
+            // 获取商品信息
+            fetch(`./php/getMerchantShop.php?merchantId=${merchantId}`)
+                .then(response => response.json())
+                .then(products => {
+                    const container = document.getElementById('product-container');
+                    container.innerHTML = '';
+                    products.forEach(product => {
+                        const productCard = document.createElement('div');
+                        productCard.className = 'product-card';
+                        
+                        const img = document.createElement('img');
+                        img.src = 'commodity/temp.jpg';
+                        img.dataset.src = `commodity/${product.merchants_id}/${product.Id}/main.jpg`; // 实际图片源
+                        
+                        productCard.innerHTML = `
+                            <h1>${product.commodity_title}</h1>
+                            <div class="description">${product.commodity_info}</div>
+                            <div class="price">￥${product.price}</div>`;
+                        
+                        productCard.prepend(img);
+                        productCard.onclick = () => {
+                            location.href = `commodity.html?id=${product.Id}`;
+                        };
+                        container.appendChild(productCard);
+                        imgObserver.observe(img);
+                    });
+                })
+                .catch(error => console.error('获取商品数据失败:', error));
+        } else {
+            document.getElementById('merchant-name').textContent = '无效的商家ID';
+        }
+
+        const imgObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.onload = () => img.style.opacity = 1;
+                    imgObserver.unobserve(img);
+                }
+            });
+        });
+
+        document.oncontextmenu = () => false;
+        document.addEventListener('touchstart', (event) => { if (event.touches.length > 1) event.preventDefault(); });
+    </script>
+</body>
+</html>

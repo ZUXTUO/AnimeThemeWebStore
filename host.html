@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商城页面</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-image: url('img/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        #loading-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            color: #ffffff;
+            display: none; /* 默认隐藏 */
+            text-align: center;
+            text-shadow: 1px 1px 2px black;
+        }
+        #product-container {
+            position: relative;
+            height: calc(100vh - 80px - 40px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: transform 1s ease;
+        }
+        .product-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            width: calc(100% - 20px);
+            height: calc(100% - 20px);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        img {
+            max-width: 100%;
+            max-height: 80%;
+            height: auto;
+            border-radius: 10px;
+            display: none;
+        }
+        h1 {
+            font-size: 1.4em;
+            margin: 5px 0;
+            color: #333;
+        }
+        .description {
+            font-size: 0.9em;
+            color: #555;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+        .price {
+            font-size: 3em;
+            color: #e74c3c;
+            margin: 5px 0;
+        }
+        #footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .footer-button {
+            padding: 12px;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+        }
+        .footer-button:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div id="loading-message">艾拉正在猜测你的喜好</div>
+    <div id="product-container"></div>
+    <div id="footer">
+        <div class="footer-button" onclick="location.href='index.html'">主页</div>
+        <div class="footer-button" onclick="location.href='cart.html'">购物车</div>
+        <div class="footer-button" onclick="location.href='user.html'">我的</div>
+    </div>
+    <script>
+        let currentProductIndex = 0, products = [], merchantNames = {}, startY = 0;
+
+        // 显示加载信息
+        document.getElementById('loading-message').style.display = 'block';
+
+        fetch('./php/shop.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) return console.error(data.error);
+                products = data;
+                const merchantIds = [...new Set(products.map(p => p.merchants_id))];
+                return Promise.all(merchantIds.map(id => getMerchantName(id)));
+            })
+            .then(names => {
+                names.forEach(name => { merchantNames[name.id] = name.name; });
+                displayProduct(currentProductIndex);
+            })
+            .catch(error => console.error('获取商品数据失败:', error))
+            .finally(() => {
+                // 隐藏加载信息
+                document.getElementById('loading-message').style.display = 'none';
+            });
+
+        function displayProduct(index) {
+            const container = document.getElementById('product-container');
+            container.innerHTML = '';
+            if (products.length > 0) {
+                const product = products[index];
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                const img = document.createElement('img');
+                img.src = 'commodity/temp.jpg';
+                const mainImagePath = `/commodity/${product.merchants_id}/${product.Id}/main.jpg`;
+                
+                img.onload = () => {
+                    img.src = mainImagePath;
+                    img.style.display = 'block';
+                };
+                img.onerror = () => img.src = 'commodity/temp.jpg';
+                
+                productCard.innerHTML = `
+                    <h1>${product.commodity_title}</h1>
+                    <div class="description">${product.commodity_info}</div>
+                    <div class="price">￥${product.price}</div>
+                `;
+                productCard.prepend(img);
+                productCard.onclick = () => {
+                    location.href = `commodity.html?id=${product.Id}`;
+                };
+                container.appendChild(productCard);
+                setTimeout(() => {
+                    productCard.style.opacity = 1;
+                    productCard.style.transform = 'translateY(0)';
+                }, 10);
+            }
+        }
+
+        function getMerchantName(merchants_id) {
+            return fetch(`./php/getMerchantName.php?id=${merchants_id}`)
+                .then(response => response.json())
+                .then(data => data.error ? { id: merchants_id, name: "未知商家" } : { id: merchants_id, name: data.name })
+                .catch(() => ({ id: merchants_id, name: "未知商家" }));
+        }
+
+        document.addEventListener('touchstart', (event) => { startY = event.touches[0].clientY; });
+        document.addEventListener('touchend', (event) => {
+            const endY = event.changedTouches[0].clientY;
+            const deltaY = endY - startY;
+            if (Math.abs(deltaY) > 50) {
+                currentProductIndex = (deltaY > 0) ? (currentProductIndex > 0 ? currentProductIndex - 1 : products.length - 1) 
+                                                    : (currentProductIndex < products.length - 1 ? currentProductIndex + 1 : 0);
+                displayProduct(currentProductIndex);
+            }
+        });
+
+        document.oncontextmenu = () => false;
+        document.addEventListener('touchstart', (event) => { if (event.touches.length > 1) event.preventDefault(); });
+    </script>
+</body>
+</html>

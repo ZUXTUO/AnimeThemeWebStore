@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-image: url('img/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+        .register-form {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .register-form input[type="text"],
+        .register-form input[type="password"],
+        .register-form input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .register-button,
+        .login-button {
+            padding: 12px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            width: 100%; /* 确保按钮宽度一致 */
+        }
+        .register-button {
+            background-color: #007bff;
+            color: white;
+            margin-bottom: 10px; /* 注册按钮和登录按钮之间的间距 */
+        }
+        .register-button:hover {
+            background-color: #0056b3;
+        }
+        .login-button {
+            background-color: #6c757d;
+            color: white;
+            display: none; /* 初始隐藏 */
+        }
+        .login-button:hover {
+            background-color: #5a6268;
+        }
+        .message-box {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-form">
+        <h2>注册</h2>
+        <input type="text" id="customId" placeholder="自定义ID(纯数字，限制20位数字)" required>
+        <input type="text" id="username" placeholder="自定义用户名" required>
+        <input type="password" id="password" placeholder="密码" required>
+        <input type="password" id="confirmPassword" placeholder="确认密码" required>
+        <input type="file" id="avatar" accept="image/*" required>
+        <button class="register-button" onclick="register()">注册</button>
+        <button class="login-button" onclick="location.href='login.html'">没有自动跳转？点我返回登录</button>
+    </div>
+    <div class="message-box" id="messageBox"></div>
+
+    <script>
+        function register() {
+            const customId = document.getElementById('customId').value;
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const avatar = document.getElementById('avatar').files[0];
+            const messageBox = document.getElementById('messageBox');
+
+            messageBox.style.display = 'none';
+            messageBox.innerText = '';
+
+            // 验证 customId
+            if (!/^[1-9]\d{0,18}$/.test(customId)) {
+                messageBox.innerText = "自定义ID必须为大于0的数字，且最多19位。";
+                messageBox.style.display = 'block';
+                return;
+            }
+
+            // 验证密码是否匹配
+            if (password !== confirmPassword) {
+                messageBox.innerText = "密码不匹配，请确认密码。";
+                messageBox.style.display = 'block';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('customId', customId);
+            formData.append('username', username);
+            formData.append('password', password);
+            formData.append('avatar', avatar);
+
+            fetch('./php/register.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data == '1') {
+                    messageBox.innerText = "注册成功！";
+                    messageBox.style.display = 'block';
+                    document.querySelector('.login-button').style.display = 'block';
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    messageBox.innerText = data;
+                    messageBox.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                console.error('注册失败:', error);
+                messageBox.innerText = "注册失败，请稍后再试。";
+                messageBox.style.display = 'block';
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商家登录与商品列表</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #2c2c2c;
+            color: #f9f9f9;
+        }
+        h1, h2 {
+            color: #f9f9f9;
+        }
+        #login-form, #product-list, #add-product-modal {
+            background: #3c3c3c;
+            padding: 20px;
+            border-radius: 10px; /* 更圆的边角 */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* 更明显的阴影效果 */
+            margin-bottom: 20px;
+        }
+        input[type="text"], input[type="password"], input[type="number"], input[type="file"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background-color: #444;
+            color: #f9f9f9;
+        }
+        input[type="submit"], button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+            margin: 5px 0; /* 添加间隔 */
+        }
+        input[type="submit"]:hover, button:hover {
+            background-color: #218838;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #555;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #4c4c4c;
+        }
+        tr {
+            height: 60px;
+        }
+        .editable {
+            width: 100%;
+            height: 40px;
+            resize: vertical;
+        }
+        .editable.textarea {
+            height: 60px;
+        }
+        .product-image {
+            width: 50px;
+            height: auto;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #add-product-modal {
+            display: none; /* 隐藏弹出框 */
+            position: fixed; /* 固定位置 */
+            z-index: 1; /* 在顶部 */
+            left: 0;
+            top: 0;
+            width: 100%; /* 全宽 */
+            height: 100%; /* 全高 */
+            overflow: auto; /* 需要时启用滚动 */
+            background-color: rgba(0, 0, 0, 0.4); /* 黑色背景带透明 */
+        }
+        .modal-content {
+            background-color: #3c3c3c;
+            margin: 15% auto; /* 顶部 15% 并居中 */
+            padding: 20px;
+            border-radius: 10px; /* 圆角 */
+            width: 80%; /* 根据屏幕大小可调整 */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* 阴影 */
+        }
+    </style>
+</head>
+<body>
+    <h1 id="page-title">商家登录</h1>
+    
+    <div id="login-form">
+        <form id="loginForm">
+            <label for="id">商家 ID:</label>
+            <input type="text" id="id" name="id" required>
+            <label for="password">密码:</label>
+            <input type="password" id="password" name="password" required>
+            <input type="submit" value="登录">
+        </form>
+    </div>
+    
+    <div id="product-list" style="display:none;">
+        <h2>商品列表</h2>
+        <button onclick="reloadImages()">重新加载图片缓存</button>
+        <button onclick="showAddProductModal()">添加商品</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>商品 ID</th>
+                    <th>商品名</th>
+                    <th>信息</th>
+                    <th>价格</th>
+                    <th>库存</th>
+                    <th>可见</th>
+                    <th>主图</th>
+                    <th>详情图</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="products"></tbody>
+        </table>
+        <button onclick="logout()">登出</button>
+    </div>
+
+    <div id="add-product-modal">
+        <div class="modal-content">
+            <h2>添加商品</h2>
+            <label for="new-title">商品名:</label>
+            <input type="text" id="new-title" required>
+            <label for="new-info">商品信息:</label>
+            <textarea id="new-info" required></textarea>
+            <label for="new-price">价格:</label>
+            <input type="number" id="new-price" required>
+            <label for="new-inventory">库存:</label>
+            <input type="number" id="new-inventory" required>
+            <label for="new-view">可见:</label>
+            <select id="new-view">
+                <option value="1">是</option>
+                <option value="0">否</option>
+            </select>
+            <button onclick="addProduct()">添加</button>
+            <button onclick="closeAddProductModal()">关闭</button>
+        </div>
+    </div>
+
+    <script>
+        window.onload = function() {
+            const merchantId = localStorage.getItem('merchantId');
+            if (merchantId) {
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('product-list').style.display = 'block';
+                loadProducts(merchantId);
+            }
+        };
+
+        document.getElementById('loginForm').onsubmit = async function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+            const response = await fetch('./php/admin/login.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                const merchantId = document.getElementById('id').value;
+                document.getElementById('page-title').innerText = '欢迎, ' + result.name;
+                document.getElementById('login-form').style.display = 'none';
+                document.getElementById('product-list').style.display = 'block';
+                localStorage.setItem('merchantId', merchantId);
+                loadProducts(merchantId);
+            } else {
+                alert(result.message);
+            }
+        };
+
+        async function loadProducts(merchantId) {
+            const response = await fetch('./php/admin/getMerchantShop.php?merchantId=' + merchantId);
+            const products = await response.json();
+            const productList = document.getElementById('products');
+            productList.innerHTML = '';
+
+            products.forEach(product => {
+                const mainImageSrc = product.merchants_id && product.Id
+                    ? `/commodity/${product.merchants_id}/${product.Id}/main.jpg`
+                    : '/commodity/temp.jpg'; // 默认图片
+                const infoImageSrc = product.merchants_id && product.Id
+                    ? `/commodity/${product.merchants_id}/${product.Id}/info.jpg`
+                    : '/commodity/temp.jpg'; // 默认图片
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${product.Id}</td>
+                    <td><textarea class="editable textarea" onchange="updateProduct(${product.Id}, 'commodity_title', this.value)">${product.commodity_title}</textarea></td>
+                    <td><textarea class="editable textarea" onchange="updateProduct(${product.Id}, 'commodity_info', this.value)">${product.commodity_info}</textarea></td>
+                    <td><input type="number" class="editable" value="${product.price}" onchange="updateProduct(${product.Id}, 'price', this.value)"></td>
+                    <td><input type="number" class="editable" value="${product.inventory}" onchange="updateProduct(${product.Id}, 'inventory', this.value)"></td>
+                    <td>
+                        <select onchange="updateProduct(${product.Id}, 'view', this.value)">
+                            <option value="1" ${product.view === 1 ? 'selected' : ''}>是</option>
+                            <option value="0" ${product.view === 0 ? 'selected' : ''}>否</option>
+                        </select>
+                    </td>
+                    <td>
+                        <img src="${mainImageSrc}" class="product-image" alt="主图" onclick="selectImage(${product.Id}, 'main')">
+                        <input type="file" id="main-image-${product.Id}" style="display:none;" accept="image/*" onchange="uploadImage(${product.Id}, 'main', this.files[0], this)">
+                    </td>
+                    <td>
+                        <img src="${infoImageSrc}" class="product-image" alt="详情图" onclick="selectImage(${product.Id}, 'info')">
+                        <input type="file" id="info-image-${product.Id}" style="display:none;" accept="image/*" onchange="uploadImage(${product.Id}, 'info', this.files[0], this)">
+                    </td>
+                    <td><button onclick="syncProduct(${product.Id})">同步</button></td>`;
+                productList.appendChild(row);
+            });
+        }
+
+        function showAddProductModal() {
+            document.getElementById('add-product-modal').style.display = 'block';
+        }
+
+        function closeAddProductModal() {
+            document.getElementById('add-product-modal').style.display = 'none';
+        }
+
+        async function addProduct() {
+            const merchantId = localStorage.getItem('merchantId'); // 获取商家 ID
+            const newTitle = document.getElementById('new-title').value;
+            const newInfo = document.getElementById('new-info').value;
+            const newPrice = document.getElementById('new-price').value;
+            const newInventory = document.getElementById('new-inventory').value;
+            const newView = document.getElementById('new-view').value;
+
+            const productData = {
+                merchants_id: merchantId, // 包含商家 ID
+                commodity_title: newTitle,
+                commodity_info: newInfo,
+                price: newPrice,
+                inventory: newInventory,
+                view: newView
+            };
+
+            const response = await fetch('./php/admin/addProduct.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(productData)
+            });
+
+            const result = await response.json();
+            alert(result.message);
+            closeAddProductModal();
+            loadProducts(merchantId);
+        }
+
+        function selectImage(productId, type) {
+            document.getElementById(`${type}-image-${productId}`).click();
+        }
+
+        async function uploadImage(productId, type, file, inputElement) {
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('merchantId', localStorage.getItem('merchantId'));
+            formData.append('productId', productId);
+            formData.append('type', type);
+
+            const response = await fetch('./php/admin/upload_commodity_image.php', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                const imgElement = inputElement.previousElementSibling; // 获取图片元素
+                imgElement.src = `/commodity/${localStorage.getItem('merchantId')}/${productId}/${type === 'main' ? 'main.jpg' : 'info.jpg'}?t=${new Date().getTime()}`; // 添加时间戳以避免缓存
+            }
+        }
+
+        function reloadImages() {
+            const products = document.querySelectorAll('#products tr');
+            products.forEach(row => {
+                const productId = row.cells[0].innerText;
+                const mainImage = row.querySelector('img[alt="主图"]');
+                const infoImage = row.querySelector('img[alt="详情图"]');
+                mainImage.src = `/commodity/${localStorage.getItem('merchantId')}/${productId}/main.jpg?t=${new Date().getTime()}`; // 添加时间戳以避免缓存
+                infoImage.src = `/commodity/${localStorage.getItem('merchantId')}/${productId}/info.jpg?t=${new Date().getTime()}`; // 添加时间戳以避免缓存
+            });
+        }
+
+        async function updateProduct(productId, field, value) {
+            console.log(`Updating product ${productId}: ${field} = ${value}`);
+        }
+
+        async function syncProduct(productId) {
+            const row = Array.from(document.querySelectorAll('#products tr')).find(r => r.cells[0].innerText == productId);
+            if (!row) {
+                console.error('Product row not found for ID:', productId);
+                return;
+            }
+            const inputs = row.querySelectorAll('.editable');
+            const updatedData = {
+                Id: productId,
+                commodity_title: inputs[0].value,
+                commodity_info: inputs[1].value,
+                price: inputs[2].value,
+                inventory: inputs[3].value,
+                view: row.querySelector('select').value
+            };
+
+            const response = await fetch('./php/admin/syncProduct.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedData)
+            });
+
+            const result = await response.json();
+            alert(result.message);
+        }
+
+        function logout() {
+            localStorage.removeItem('merchantId');
+            document.getElementById('login-form').style.display = 'block';
+            document.getElementById('product-list').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

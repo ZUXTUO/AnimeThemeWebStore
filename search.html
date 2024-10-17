@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商城页面</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-image: url('img/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        #search-bar {
+            display: flex;
+            align-items: center;
+            background-color: rgba(255, 255, 255, 0.9);
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        #search-input {
+            border: none;
+            outline: none;
+            flex-grow: 1;
+            padding: 5px;
+            padding-right: 10px;
+            border-radius: 10px;
+            margin-right: 8px;
+        }
+        #search-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        #search-button:hover {
+            background-color: #0056b3;
+        }
+        #product-container {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            height: calc(100vh - 80px - 15px - 50px); /* 减去按钮高度 */
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+        .product-card {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 320px;
+            min-width: 100px;
+            flex-grow: 1;
+        }
+        img {
+            max-width: 100%;
+            max-height: 60%;
+            height: auto;
+            border-radius: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        h1 {
+            font-size: 1.2em;
+            margin: 5px 0;
+            color: #333;
+        }
+        .description {
+            font-size: 0.9em;
+            color: #555;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 100%;
+        }
+        .price {
+            font-size: 1.8em;
+            color: #e74c3c;
+            margin: 5px 0;
+        }
+        #home-button {
+            background-color: #87CEEB; /* 浅蓝色 */
+            color: rgb(32, 0, 160);
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 1em;
+            margin-top: 10px;
+            transition: background-color 0.3s;
+        }
+        #home-button:hover {
+            background-color: #00BFFF; /* 深一点的蓝色 */
+        }
+    </style>
+</head>
+<body>
+    <div id="search-bar">
+        <input type="text" id="search-input" placeholder="搜索商品...">
+        <button id="search-button">搜索</button>
+    </div>
+    <div id="product-container"></div>
+    <button id="home-button" onclick="location.href='index.html'">回到主页</button>
+
+    <script>
+        let products = [];
+
+        function updateURL(newUrl) {
+            history.replaceState(null, '', newUrl);
+        }
+
+        function fetchProducts(searchTerm) {
+            fetch(`./php/search.php?search=${encodeURIComponent(searchTerm)}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) return console.error(data.error);
+                    products = data;
+                    displayProducts();
+                })
+                .catch(error => console.error('获取商品数据失败:', error));
+        }
+
+        function displayProducts() {
+            const container = document.getElementById('product-container');
+            container.innerHTML = '';
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+
+                const img = document.createElement('img');
+                img.src = 'commodity/temp.jpg';
+                img.dataset.src = `/commodity/${product.merchants_id}/${product.Id}/main.jpg`;
+
+                productCard.innerHTML = `
+                    <h1>${product.commodity_title}</h1>
+                    <div class="description">${product.commodity_info}</div>
+                    <div class="price">￥${product.price}</div>`;
+
+                productCard.prepend(img);
+                productCard.onclick = () => {
+                    location.href = `commodity.html?id=${product.Id}`;
+                };
+                container.appendChild(productCard);
+                imgObserver.observe(img);
+            });
+        }
+
+        const imgObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.onload = () => img.style.opacity = 1;
+                    imgObserver.unobserve(img);
+                }
+            });
+        });
+
+        document.getElementById('search-button').onclick = function() {
+            const searchTerm = document.getElementById('search-input').value;
+            fetchProducts(searchTerm);
+            updateURL(`search.html?info=${encodeURIComponent(searchTerm)}`);
+        };
+
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const info = urlParams.get('info');
+            if (info) {
+                document.getElementById('search-input').value = info;
+                fetchProducts(info);
+                updateURL('search.html');  // 移除参数
+            }
+        };
+
+        document.oncontextmenu = () => false;
+        document.addEventListener('touchstart', (event) => { if (event.touches.length > 1) event.preventDefault(); });
+    </script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>购物车</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-image: url('img/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .cart-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 90%;
+            max-height: calc(100vh - 220px);
+            overflow-y: auto;
+        }
+        .header {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            margin-bottom: 20px;
+        }
+        .empty-cart-message {
+            font-size: 2em;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            margin: 20px 0;
+            display: none; /* 默认隐藏 */
+        }
+        .cart-item {
+            background-color: white;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            width: 100%;
+        }
+        .cart-item img {
+            width: 100px;
+            height: 100px;
+            border-radius: 5px;
+            margin-right: 15px;
+            border: 2px solid #ccc;
+            cursor: pointer;
+        }
+        .item-details {
+            flex-grow: 1;
+            margin-right: 15px;
+        }
+        .item-title {
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            color: black;
+            margin: 5px 0;
+        }
+        .item-quantity {
+            font-size: 0.8em;
+            color: rgb(118, 0, 45);
+            font-weight: bold;
+        }
+        .item-price {
+            font-size: 0.9em;
+            color: rgb(174, 0, 0);
+            font-weight: bold;
+        }
+        .remove-button, .buy-button {
+            background-color: red;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 15px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-left: 10px;
+        }
+        .remove-button:hover, .buy-button:hover {
+            background-color: darkred;
+        }
+        #footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .footer-button {
+            padding: 12px;
+            cursor: pointer;
+            text-align: center;
+            flex: 1;
+            border-radius: 10px;
+            transition: background-color 0.3s;
+        }
+        .footer-button:hover {
+            background-color: rgba(0, 0, 0, 0.1);
+        }
+        .notification {
+            display: none;
+            position: fixed;
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: red;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            z-index: 1000;
+            transition: opacity 0.5s;
+        }
+    </style>
+    <script>
+        let userId;
+
+        fetch('./php/getUser.php')
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    window.location.href = 'login.html';
+                } else {
+                    userId = data.id;
+                    loadCart(userId);
+                }
+            })
+            .catch(error => console.error('检查登录状态失败:', error));
+
+        function loadCart(userId) {
+            fetch(`./php/getCartInfo.php?user_id=${userId}`)
+                .then(response => response.json())
+                .then(cartItems => {
+                    const cartContainer = document.getElementById('cart-container');
+                    const emptyMessage = document.querySelector('.empty-cart-message');
+                    cartContainer.innerHTML = '';
+
+                    if (cartItems.length === 0) {
+                        cartContainer.style.display = 'none'; // 隐藏购物车框
+                        emptyMessage.style.display = 'block'; // 显示空购物车信息
+                    } else {
+                        cartContainer.style.display = 'flex'; // 显示购物车框
+                        emptyMessage.style.display = 'none'; // 隐藏空购物车信息
+                        cartItems.forEach(item => {
+                            const cartItemDiv = document.createElement('div');
+                            cartItemDiv.className = 'cart-item';
+
+                            const img = document.createElement('img');
+                            img.src = `/commodity/${item.merchants_id}/${item.commodity_id}/main.jpg`;
+                            img.onclick = () => location.href = `commodity.html?id=${item.commodity_id}`;
+
+                            const detailsDiv = document.createElement('div');
+                            detailsDiv.className = 'item-details';
+                            detailsDiv.innerHTML = `
+                                <div class="item-title" onclick="location.href='commodity.html?id=${item.commodity_id}'">${item.commodity_title}</div>
+                                <div class="item-quantity">数量: ${item.num}</div>
+                                <div class="item-price">价格: <br>${item.price}元 x ${item.num} = ${item.price * item.num}元</div>
+                            `;
+
+                            const buyButton = document.createElement('button');
+                            buyButton.className = 'buy-button';
+                            buyButton.innerText = '购买';
+                            buyButton.onclick = () => buyNow(item.commodity_id, item.merchants_id, item.num);
+
+                            const removeButton = document.createElement('button');
+                            removeButton.className = 'remove-button';
+                            removeButton.innerText = '删除';
+                            removeButton.onclick = () => removeFromCart(item.commodity_id);
+
+                            cartItemDiv.appendChild(img);
+                            cartItemDiv.appendChild(detailsDiv);
+                            cartItemDiv.appendChild(buyButton); // 添加购买按钮
+                            cartItemDiv.appendChild(removeButton);
+                            cartContainer.appendChild(cartItemDiv);
+                        });
+                    }
+                })
+                .catch(error => console.error('加载购物车失败:', error));
+        }
+
+        function removeFromCart(commodityId) {
+            fetch('./php/cart_remove.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `user_id=${userId}&commodity_id=${commodityId}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                showNotification(data.message);
+                loadCart(userId);
+            })
+            .catch(error => console.error('删除商品失败:', error));
+        }
+
+        function buyNow(productId, merchantId, quantity) {
+            window.location.href = `create_order.html?commodity_id=${productId}&merchant_id=${merchantId}&num=${quantity}`;
+        }
+
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.innerText = message;
+            document.body.appendChild(notification);
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 500); // 500ms后移除DOM
+            }, 2000); // 2秒后消失
+        }
+
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+        });
+    </script>
+</head>
+<body>
+    <div class="header">购物车</div>
+    <div class="empty-cart-message">购物车是空的</div> <!-- 这里是空购物车提示 -->
+    <div class="cart-container" id="cart-container"></div>
+    <div id="footer">
+        <div class="footer-button" onclick="location.href='index.html'">主页</div>
+        <div class="footer-button" onclick="location.href='cart.html'">购物车</div>
+        <div class="footer-button" onclick="location.href='user.html'">我的</div>
+    </div>
+</body>
+</html>
