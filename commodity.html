@@ -337,7 +337,7 @@
             // 日志输出
             console.log(`用户ID: ${userId}, 商品ID: ${product.Id}, 数量: ${quantity}`);
 
-            fetch('./php/cart_add.php', {
+            fetch('./php/cart/cart_add.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'

@@ -17,8 +17,8 @@
         #login-form, #product-list, #add-product-modal {
             background: #3c3c3c;
             padding: 20px;
-            border-radius: 10px; /* 更圆的边角 */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* 更明显的阴影效果 */
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             margin-bottom: 20px;
         }
         input[type="text"], input[type="password"], input[type="number"], input[type="file"], textarea {
@@ -38,7 +38,7 @@
             border-radius: 5px;
             cursor: pointer;
             width: 100%;
-            margin: 5px 0; /* 添加间隔 */
+            margin: 5px 0;
         }
         input[type="submit"]:hover, button:hover {
             background-color: #218838;
@@ -74,23 +74,45 @@
             cursor: pointer;
         }
         #add-product-modal {
-            display: none; /* 隐藏弹出框 */
-            position: fixed; /* 固定位置 */
-            z-index: 1; /* 在顶部 */
+            display: none;
+            position: fixed;
+            z-index: 1;
             left: 0;
             top: 0;
-            width: 100%; /* 全宽 */
-            height: 100%; /* 全高 */
-            overflow: auto; /* 需要时启用滚动 */
-            background-color: rgba(0, 0, 0, 0.4); /* 黑色背景带透明 */
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.4);
         }
         .modal-content {
             background-color: #3c3c3c;
-            margin: 15% auto; /* 顶部 15% 并居中 */
+            margin: 15% auto;
             padding: 20px;
-            border-radius: 10px; /* 圆角 */
-            width: 80%; /* 根据屏幕大小可调整 */
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* 阴影 */
+            border-radius: 10px;
+            width: 80%;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .page-item {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 5px;
+            transition: background-color 0.3s;
+        }
+        .page-item:hover {
+            background-color: #218838;
+        }
+        .page-item.active {
+            background-color: #218838;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -111,6 +133,7 @@
         <h2>商品列表</h2>
         <button onclick="reloadImages()">重新加载图片缓存</button>
         <button onclick="showAddProductModal()">添加商品</button>
+        <button style="background-color: #dc3545; color: white;" onclick="location.href='manager.html'">订单管理</button>
         <table>
             <thead>
                 <tr>
@@ -127,7 +150,8 @@
             </thead>
             <tbody id="products"></tbody>
         </table>
-        <button onclick="logout()">登出</button>
+        <div class="pagination" id="pagination"></div>
+        <button style="background-color: #dc8e35; color: white;" onclick="logout()">登出</button>
     </div>
 
     <div id="add-product-modal">
@@ -152,6 +176,10 @@
     </div>
 
     <script>
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let productsData = [];
+
         window.onload = function() {
             const merchantId = localStorage.getItem('merchantId');
             if (merchantId) {
@@ -164,7 +192,7 @@
         document.getElementById('loginForm').onsubmit = async function(event) {
             event.preventDefault();
             const formData = new FormData(this);
-            const response = await fetch('./php/admin/login.php', {
+            const response = await fetch('../php/admin/login.php', {
                 method: 'POST',
                 body: formData
             });
@@ -183,18 +211,25 @@
         };
 
         async function loadProducts(merchantId) {
-            const response = await fetch('./php/admin/getMerchantShop.php?merchantId=' + merchantId);
-            const products = await response.json();
+            const response = await fetch('../php/admin/getMerchantShop.php?merchantId=' + merchantId);
+            productsData = await response.json();
+            displayProducts();
+        }
+
+        function displayProducts() {
             const productList = document.getElementById('products');
             productList.innerHTML = '';
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const paginatedItems = productsData.slice(start, end);
 
-            products.forEach(product => {
+            paginatedItems.forEach(product => {
                 const mainImageSrc = product.merchants_id && product.Id
-                    ? `/commodity/${product.merchants_id}/${product.Id}/main.jpg`
-                    : '/commodity/temp.jpg'; // 默认图片
+                    ? `../commodity/${product.merchants_id}/${product.Id}/main.jpg`
+                    : '../commodity/temp.jpg';
                 const infoImageSrc = product.merchants_id && product.Id
-                    ? `/commodity/${product.merchants_id}/${product.Id}/info.jpg`
-                    : '/commodity/temp.jpg'; // 默认图片
+                    ? `../commodity/${product.merchants_id}/${product.Id}/info.jpg`
+                    : '../commodity/temp.jpg';
 
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -205,8 +240,8 @@
                     <td><input type="number" class="editable" value="${product.inventory}" onchange="updateProduct(${product.Id}, 'inventory', this.value)"></td>
                     <td>
                         <select onchange="updateProduct(${product.Id}, 'view', this.value)">
-                            <option value="1" ${product.view === 1 ? 'selected' : ''}>是</option>
-                            <option value="0" ${product.view === 0 ? 'selected' : ''}>否</option>
+                            <option value="1" ${product.view == 1 ? 'selected' : ''}>是</option>
+                            <option value="0" ${product.view == 0 ? 'selected' : ''}>否</option>
                         </select>
                     </td>
                     <td>
@@ -220,6 +255,27 @@
                     <td><button onclick="syncProduct(${product.Id})">同步</button></td>`;
                 productList.appendChild(row);
             });
+
+            setupPagination();
+        }
+
+        function setupPagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            const totalPages = Math.ceil(productsData.length / itemsPerPage);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageItem = document.createElement('span');
+                pageItem.innerText = i;
+                pageItem.className = 'page-item ' + (i === currentPage ? 'active' : '');
+                pageItem.onclick = () => changePage(i);
+                pagination.appendChild(pageItem);
+            }
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            displayProducts();
         }
 
         function showAddProductModal() {
@@ -231,7 +287,7 @@
         }
 
         async function addProduct() {
-            const merchantId = localStorage.getItem('merchantId'); // 获取商家 ID
+            const merchantId = localStorage.getItem('merchantId');
             const newTitle = document.getElementById('new-title').value;
             const newInfo = document.getElementById('new-info').value;
             const newPrice = document.getElementById('new-price').value;
@@ -239,7 +295,7 @@
             const newView = document.getElementById('new-view').value;
 
             const productData = {
-                merchants_id: merchantId, // 包含商家 ID
+                merchants_id: merchantId,
                 commodity_title: newTitle,
                 commodity_info: newInfo,
                 price: newPrice,
@@ -247,7 +303,7 @@
                 view: newView
             };
 
-            const response = await fetch('./php/admin/addProduct.php', {
+            const response = await fetch('../php/admin/addProduct.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -272,15 +328,15 @@
             formData.append('productId', productId);
             formData.append('type', type);
 
-            const response = await fetch('./php/admin/upload_commodity_image.php', {
+            const response = await fetch('../php/admin/upload_commodity_image.php', {
                 method: 'POST',
                 body: formData
             });
 
             const result = await response.json();
             if (result.success) {
-                const imgElement = inputElement.previousElementSibling; // 获取图片元素
-                imgElement.src = `/commodity/${localStorage.getItem('merchantId')}/${productId}/${type === 'main' ? 'main.jpg' : 'info.jpg'}?t=${new Date().getTime()}`; // 添加时间戳以避免缓存
+                const imgElement = inputElement.previousElementSibling;
+                imgElement.src = `../commodity/${localStorage.getItem('merchantId')}/${productId}/${type === 'main' ? 'main.jpg' : 'info.jpg'}?t=${new Date().getTime()}`;
             }
         }
 
@@ -290,8 +346,8 @@
                 const productId = row.cells[0].innerText;
                 const mainImage = row.querySelector('img[alt="主图"]');
                 const infoImage = row.querySelector('img[alt="详情图"]');
-                mainImage.src = `/commodity/${localStorage.getItem('merchantId')}/${productId}/main.jpg?t=${new Date().getTime()}`; // 添加时间戳以避免缓存
-                infoImage.src = `/commodity/${localStorage.getItem('merchantId')}/${productId}/info.jpg?t=${new Date().getTime()}`; // 添加时间戳以避免缓存
+                mainImage.src = `../commodity/${localStorage.getItem('merchantId')}/${productId}/main.jpg?t=${new Date().getTime()}`;
+                infoImage.src = `../commodity/${localStorage.getItem('merchantId')}/${productId}/info.jpg?t=${new Date().getTime()}`;
             });
         }
 
@@ -315,7 +371,7 @@
                 view: row.querySelector('select').value
             };
 
-            const response = await fetch('./php/admin/syncProduct.php', {
+            const response = await fetch('../php/admin/syncProduct.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-include 'db.php';
+include '../db.php';
 
 // 获取用户ID
 $user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;

@@ -139,7 +139,7 @@
 
     // 加载用户订单
     function loadOrders(userId) {
-        fetch(`./php/get_orders.php?user_id=${userId}`)
+        fetch(`./php/order/get_orders.php?user_id=${userId}`)
             .then(response => response.json())
             .then(orders => {
                 const orderContainer = document.getElementById('order-container');
@@ -159,7 +159,7 @@
                         const imgSrc = `/commodity/${order.merchants_id}/${order.commodity_id}/main.jpg`;
 
                         // 直接通过 PHP 获取状态名称
-                        fetch(`./php/getOrderStatus.php?status=${order.order_status}`)
+                        fetch(`./php/order/getOrderStatus.php?status=${order.order_status}`)
                             .then(response => response.json())
                             .then(statusData => {
                                 const orderStatus = statusData.statusName || "未知状态";

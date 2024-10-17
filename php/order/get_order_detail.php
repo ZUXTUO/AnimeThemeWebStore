@@ -1,7 +1,7 @@
 <?php
 header('Content-Type: application/json');
 
-include 'db.php';
+include '../db.php';
 
 // 获取订单ID
 $order_id = isset($_GET['id']) ? intval($_GET['id']) : 0;

@@ -224,7 +224,7 @@
 
             console.log('即将发送的订单数据:', orderData);
 
-            fetch('./php/create_order.php', {
+            fetch('./php/order/order_create.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

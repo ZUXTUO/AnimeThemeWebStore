@@ -166,7 +166,7 @@
         orderId = urlParams.get('id');
 
 function loadOrderDetail(orderId) {
-    fetch(`./php/get_order_detail.php?id=${orderId}`)
+    fetch(`./php/order/get_order_detail.php?id=${orderId}`)
         .then(response => response.json())
         .then(order => {
             console.warn(order);
@@ -182,7 +182,7 @@ function loadOrderDetail(orderId) {
             const imgSrc = `/commodity/${order.merchants_id}/${order.commodity_id}/main.jpg`;
             orderStatus = order.order_status;
 
-            fetch(`./php/getOrderStatus.php?status=${order.order_status}`)
+            fetch(`./php/order/getOrderStatus.php?status=${order.order_status}`)
                 .then(response => response.json())
                 .then(statusData => {
                     const statusName = statusData.statusName;
@@ -308,7 +308,7 @@ function loadOrderDetail(orderId) {
         function cancelOrder() {
             if(orderStatus == 0)
             {
-                fetch('./php/cancel_order.php', {
+                fetch('./php/order/order_cancel.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'

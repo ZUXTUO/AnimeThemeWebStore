@@ -157,7 +157,7 @@
             .catch(error => console.error('检查登录状态失败:', error));
 
         function loadCart(userId) {
-            fetch(`./php/getCartInfo.php?user_id=${userId}`)
+            fetch(`./php/cart/getCartInfo.php?user_id=${userId}`)
                 .then(response => response.json())
                 .then(cartItems => {
                     const cartContainer = document.getElementById('cart-container');
@@ -208,7 +208,7 @@
         }
 
         function removeFromCart(commodityId) {
-            fetch('./php/cart_remove.php', {
+            fetch('./php/cart/cart_remove.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

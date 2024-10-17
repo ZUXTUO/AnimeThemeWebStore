@@ -1,6 +1,6 @@
 <?php
 header('Content-Type: application/json');
-include 'db.php'; // 包含数据库连接
+include '../db.php'; // 包含数据库连接
 
 // 获取 POST 数据
 $data = json_decode(file_get_contents("php://input"), true);
