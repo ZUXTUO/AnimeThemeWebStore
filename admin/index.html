@@ -96,6 +96,7 @@
             display: flex;
             justify-content: center;
             margin-top: 20px;
+            gap: 20px; /* 设置按钮之间的间隔 */
         }
         .page-item {
             background-color: #28a745;
@@ -261,17 +262,50 @@
         }
 
         function setupPagination() {
-            const pagination = document.getElementById('pagination');
-            pagination.innerHTML = '';
-            const totalPages = Math.ceil(productsData.length / itemsPerPage);
+		        const pagination = document.getElementById('pagination'); // 获取分页容器
+		        pagination.innerHTML = ''; // 清空现有的分页内容
+		        const totalPages = Math.ceil(productsData.length / itemsPerPage); // 计算总页数
 
-            for (let i = 1; i <= totalPages; i++) {
-                const pageItem = document.createElement('span');
-                pageItem.innerText = i;
-                pageItem.className = 'page-item ' + (i === currentPage ? 'active' : '');
-                pageItem.onclick = () => changePage(i);
-                pagination.appendChild(pageItem);
-            }
+		        const range = 2; // 当前页周围显示的页码数量
+
+		        // 创建"第一页"按钮
+		        if (currentPage > 1) {
+				        const firstButton = document.createElement('button'); // 创建按钮元素
+				        firstButton.innerText = '第一页'; // 设置按钮文本为"第一页"
+				        firstButton.onclick = () => changePage(1); // 点击时切换到第一页
+				        firstButton.style.fontWeight = 'bold'; // 加粗文本
+				        firstButton.style.fontSize = '18px'; // 设置字体大小
+				        pagination.appendChild(firstButton); // 添加按钮到分页容器
+				        if (currentPage > range + 1) { // 如果当前页大于范围+1
+						        pagination.appendChild(document.createTextNode('...')); // 添加省略号
+				        }
+		        }
+
+		        // 显示当前页和邻近的页码
+		        for (let i = Math.max(1, currentPage - range); i <= Math.min(totalPages, currentPage + range); i++) {
+				        const pageButton = document.createElement('button'); // 创建页码按钮
+				        pageButton.innerText = i; // 设置按钮文本为页码
+				        pageButton.onclick = () => changePage(i); // 点击时切换到对应页
+				        pageButton.style.fontWeight = 'bold'; // 加粗文本
+				        pageButton.style.fontSize = '18px'; // 设置字体大小
+				        if (i === currentPage) { // 如果是当前页
+						        pageButton.disabled = true; // 禁用按钮
+				        }
+				        pagination.appendChild(pageButton); // 添加按钮到分页容器
+		        }
+
+		        // 创建"最后一页"按钮
+		        if (currentPage < totalPages) { // 如果当前页小于总页数
+				        if (currentPage < totalPages - range) { // 如果当前页小于总页数-范围
+						        pagination.appendChild(document.createTextNode('...')); // 添加省略号
+				        }
+				        const lastButton = document.createElement('button'); // 创建按钮元素
+				        lastButton.innerText = '最后一页'; // 设置按钮文本为"最后一页"
+				        lastButton.onclick = () => changePage(totalPages); // 点击时切换到最后一页
+                        lastButton.style.fontWeight = 'bold'; // 加粗文本
+                        lastButton.style.fontSize = '18px'; // 设置字体大小
+				        pagination.appendChild(lastButton); // 添加按钮到分页容器
+		        }
         }
 
         function changePage(page) {

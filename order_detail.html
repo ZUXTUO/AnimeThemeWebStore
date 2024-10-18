@@ -201,6 +201,7 @@ function loadOrderDetail(orderId) {
                                 <div class="item-quantity">商品数量: ${order.num}</div>
                                 <div class="item-price">商品单价: ${order.price}元</div>
                                 <div class="need-pay" style="color: red; font-weight: bold;">应付款: ${totalPrice}元</div>
+                                <div class="message" style="color: red; font-weight: bold;">订单不支付超过半小时就会自动关闭！请尽快支付！</div>
                             </div>
                         </div>
                     `;
@@ -229,13 +230,13 @@ function loadOrderDetail(orderId) {
                             <input type="file" id="image-input" multiple />
                             <button onclick="uploadImages()">确认上传</button>
                             <div id="uploaded-images" class="uploaded-images"></div>
-                            <div id="no-uploaded-images" style="display: none;">付款后请将完整的支付截图传上来</div>
+                            <div id="no-uploaded-images" style="color: red; font-weight: bold;">付款后请将完整的支付截图传上来，一定要是带转账单号的截图，点击转账页面的消息就有。</div>
                         `;
                         document.getElementById('pay-button').style.display = 'inline-block';
                     } else {
                         uploadContainer.innerHTML = `
                             <div id="uploaded-images" class="uploaded-images"></div>
-                            <div id="no-uploaded-images">付款后请将完整的支付截图传上来</div>
+                            <div id="no-uploaded-images" style="color: red; font-weight: bold;">付款后请将完整的支付截图传上来，一定要是带转账单号的截图，点击转账页面的消息就有。</div>
                         `;
                         document.getElementById('pay-button').style.display = 'none';
 
@@ -379,7 +380,7 @@ function loadOrderDetail(orderId) {
             const formData = new FormData();
             formData.append('id', orderId);
             formData.append('order_static', 1);
-            fetch('./php/confirm_payment.php', {
+            fetch('./php/order/pay.php', {
                 method: 'POST',
                 body: formData
             })

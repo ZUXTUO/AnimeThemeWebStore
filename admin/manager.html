@@ -69,6 +69,7 @@
             display: flex;
             justify-content: center;
             margin-top: 20px;
+            gap: 20px; /* 设置按钮之间的间隔 */
         }
         .page-item {
             background-color: #28a745;
@@ -272,30 +273,78 @@
               });
         }
 
+        // 生成分页
         function generatePagination(totalPages) {
             const paginationContainer = document.getElementById('pagination');
-            paginationContainer.innerHTML = '';
+            paginationContainer.innerHTML = ''; // 清空现有的分页内容
 
+            // 创建上一个按钮
             const prevButton = document.createElement('button');
             prevButton.innerText = '«';
-            prevButton.disabled = currentPage === 1;
-            prevButton.onclick = () => changePage(currentPage - 1);
+            prevButton.disabled = currentPage === 1; // 当前页为第一页时禁用
+            prevButton.onclick = () => changePage(currentPage - 1); // 点击时切换到上一页
+			prevButton.style.fontWeight = 'bold'; // 加粗文本
+			prevButton.style.fontSize = '18px'; // 设置字体大小
             paginationContainer.appendChild(prevButton);
 
-            for (let i = 1; i <= totalPages; i++) {
+            // 渲染页码按钮的函数
+            const renderPageButton = (page) => {
                 const button = document.createElement('button');
-                button.innerText = i;
-                button.onclick = () => changePage(i);
-                if (i === currentPage) {
-                    button.disabled = true;
+                button.innerText = page; // 设置按钮文本为页码
+                button.onclick = () => changePage(page); // 点击时切换到对应页
+                button.style.fontWeight = 'bold'; // 加粗文本
+                button.style.fontSize = '18px'; // 设置字体大小
+                if (page === currentPage) {
+                    button.disabled = true; // 当前页禁用
                 }
-                paginationContainer.appendChild(button);
+                paginationContainer.appendChild(button); // 添加按钮到分页容器
+            };
+
+            const range = 2; // 当前页周围显示的页码数量
+
+            // 显示第一页
+            if (currentPage > 1) {
+                const firstPageButton = document.createElement('button');
+                firstPageButton.innerText = '第一页'; // 设置按钮文本为"第一页"
+                firstPageButton.onclick = () => changePage(1); // 点击时切换到第一页
+                firstPageButton.style.fontWeight = 'bold'; // 加粗文本
+                firstPageButton.style.fontSize = '18px'; // 设置字体大小
+                paginationContainer.appendChild(firstPageButton); // 添加按钮到分页容器
+
+                if (currentPage > range + 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.innerText = '...'; // 省略号
+                    paginationContainer.appendChild(ellipsis);
+                }
             }
 
+            // 显示当前页和附近的页码
+            for (let i = Math.max(1, currentPage - range); i <= Math.min(totalPages, currentPage + range); i++) {
+                renderPageButton(i);
+            }
+
+            // 显示最后一页
+            if (currentPage < totalPages) {
+                if (currentPage < totalPages - range) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.innerText = '...'; // 省略号
+                    paginationContainer.appendChild(ellipsis);
+                }
+                const lastPageButton = document.createElement('button');
+                lastPageButton.innerText = '最后一页'; // 设置按钮文本为"最后一页"
+                lastPageButton.onclick = () => changePage(totalPages); // 点击时切换到最后一页
+                lastPageButton.style.fontWeight = 'bold'; // 加粗文本
+                lastPageButton.style.fontSize = '18px'; // 设置字体大小
+                paginationContainer.appendChild(lastPageButton); // 添加按钮到分页容器
+            }
+
+            // 创建下一个按钮
             const nextButton = document.createElement('button');
             nextButton.innerText = '»';
-            nextButton.disabled = currentPage === totalPages;
-            nextButton.onclick = () => changePage(currentPage + 1);
+            nextButton.disabled = currentPage === totalPages; // 当前页为最后一页时禁用
+            nextButton.onclick = () => changePage(currentPage + 1); // 点击时切换到下一页
+            nextButton.style.fontWeight = 'bold'; // 加粗文本
+            nextButton.style.fontSize = '18px'; // 设置字体大小
             paginationContainer.appendChild(nextButton);
         }
 
