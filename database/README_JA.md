@@ -1,4 +1,4 @@
-[中文](../README_EN.md)
+[中文](../README.md)
 [English](README_EN.md)
 
 # AnimeThemeWebStore (日本語)
