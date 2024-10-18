@@ -5,7 +5,6 @@
 
 A simple mobile online store themed around anime. This project is easy to deploy and is especially suitable for users who find it difficult to apply for payment interfaces.
 
-## Project Features
 ### Project Features
 - **Easy Deployment**: Designed for users to quickly get started, primarily for educational purposes.
 - **Recommended Environment**:  
@@ -21,7 +20,6 @@ If manual configuration seems cumbersome, you can use the Little Skin Panel for 
 Please set up the server environment according to your needs.
 
 ### Database Import
-#### Database Import
 1. Create a database named `shop` in MySQL.
 2. Import the `./database/shop.sql` file into that database.
 3. Modify the database username and password, and update the relevant configurations in the `./php/db.php` file.
@@ -45,5 +43,4 @@ The merchant management interface is located in the `admin` directory. The featu
 13. **Create Order Page**: (The purchasing page) `create_order.html`
 
 ## Notes
-### Notes
 This project is for educational purposes only and may not be suitable for direct commercial use. Please use it with caution!
