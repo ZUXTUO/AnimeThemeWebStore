@@ -395,24 +395,24 @@ function loadOrderDetail(orderId) {
             .catch(error => console.error('确认支付失败:', error));
         }
 
-function confirmReceive() {
-    const formData = new FormData();
-    formData.append('id', orderId);
-    formData.append('order_static', 11);
-    fetch('./php/confirm_payment.php', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showMessage('确认收货成功！');
-            loadOrderDetail(orderId);
-        } else {
-            showMessage('确认收货失败: ' + data.error);
-        }
-    })
-    .catch(error => console.error('确认收货失败:', error));
+        function confirmReceive() {
+            const formData = new FormData();
+            formData.append('id', orderId);
+            formData.append('order_static', 11);
+            fetch('./php/confirm_payment.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showMessage('确认收货成功！');
+                    loadOrderDetail(orderId);
+                } else {
+                    showMessage('确认收货失败: ' + data.error);
+                }
+            })
+        .catch(error => console.error('确认收货失败:', error));
 }
 
 

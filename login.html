@@ -198,7 +198,7 @@
     <audio id="backgroundMusic" src="bgm/bg.ogg" autoplay loop></audio>
     <div class="notification" id="notification"></div>
     <div class="overlay" id="overlay"></div>
-    <div class="popup" id="popup">请联系管理员<br>QQ:XXXXXX</div>
+    <div class="popup" id="popup">请联系管理员<br>QQ:12345678</div>
     <div class="footer">Made by ZUXTUO</div>
     
     <script>
@@ -246,16 +246,15 @@
         function showLoginBox() {
             const loginBox = document.getElementById('loginBox');
             loginBox.classList.add('show');
-            document.getElementById('skipBtn').style.display = 'none'; // Hide the skip button
+            document.getElementById('skipBtn').style.display = 'none';
         }
     
         document.getElementById('skipBtn').addEventListener('click', function() {
-            // Skip the message and show the login box immediately
             const lines = document.querySelectorAll('.line');
             lines.forEach(line => {
-                line.style.opacity = 0; // Hide all lines
+                line.style.opacity = 0;
             });
-            showLoginBox(); // Show the login box
+            showLoginBox();
         });
     
         document.getElementById('loginBtn').addEventListener('click', function(event) {
