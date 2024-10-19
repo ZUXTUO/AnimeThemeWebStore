@@ -1,8 +1,27 @@
 ﻿# Host: localhost  (Version: 5.7.26)
-# Date: 2024-10-17 13:18:46
+# Date: 2024-10-19 19:15:02
 # Generator: MySQL-Front 5.3  (Build 4.234)
 
 /*!40101 SET NAMES utf8 */;
+
+#
+# Structure for table "admin"
+#
+
+DROP TABLE IF EXISTS `admin`;
+CREATE TABLE `admin` (
+  `Id` int(11) NOT NULL AUTO_INCREMENT,
+  `password` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`Id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1025 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
+
+#
+# Data for table "admin"
+#
+
+/*!40000 ALTER TABLE `admin` DISABLE KEYS */;
+INSERT INTO `admin` VALUES (1024,'root');
+/*!40000 ALTER TABLE `admin` ENABLE KEYS */;
 
 #
 # Structure for table "commodity"
@@ -68,7 +87,7 @@ CREATE TABLE `orders` (
   `delivery_address` varchar(255) CHARACTER SET utf8 DEFAULT NULL COMMENT '收货地址',
   `waybill_number` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=MyISAM AUTO_INCREMENT=35 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Data for table "orders"

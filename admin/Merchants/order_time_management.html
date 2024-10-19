@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商户管理</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2e2e2e; /* 深色背景 */
+            color: #f0f0f0; /* 字体颜色 */
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff; /* 标题颜色 */
+            margin-bottom: 20px; /* 标题下方的间距 */
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #555; /* 边框颜色 */
+        }
+        th {
+            background-color: #3b3b3b; /* 表头背景 */
+            color: #ffffff; /* 表头文字颜色 */
+        }
+        tr:nth-child(even) {
+            background-color: #444; /* 偶数行背景 */
+        }
+        tr:hover {
+            background-color: #555; /* 悬停效果 */
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: calc(100% - 20px); /* 输入框宽度 */
+            padding: 5px;
+            border: 1px solid #555; /* 边框颜色 */
+            border-radius: 4px;
+            background-color: #444; /* 输入框背景 */
+            color: #ffffff; /* 输入字体颜色 */
+            font-size: 14px; /* 字体大小 */
+        }
+        button {
+            background-color: #007bff; /* 按钮颜色 */
+            color: #ffffff; /* 按钮文字颜色 */
+            border: none;
+            border-radius: 4px;
+            padding: 8px 12px;
+            cursor: pointer;
+            margin-left: 10px; /* 按钮左侧间距 */
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3; /* 悬停效果 */
+        }
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end; /* 右对齐 */
+            margin-top: 10px; /* 顶部间距 */
+        }
+    </style>
+</head>
+<body>
+    <h1>商户管理</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>商户名</th>
+                <th>密码</th>
+                <th>操作</th>
+            </tr>
+        </thead>
+        <tbody id="merchantList">
+            <!-- 动态添加商家信息 -->
+        </tbody>
+    </table>
+    <div class="action-buttons">
+        <button onclick="addMerchant()">添加商户</button>
+        <button onclick="window.location.href='../admin/index.html'">返回管理员页面</button>
+    </div>
+
+    <script>
+        // 示例数据，实际应从服务器获取
+        const merchants = [
+            { Id: 1, name: '商户A', password: 'password1' },
+            { Id: 2, name: '商户B', password: 'password2' },
+            { Id: 3, name: '商户C', password: 'password3' }
+        ];
+
+        function loadMerchants() {
+            const merchantList = document.getElementById('merchantList');
+            merchantList.innerHTML = ''; // 清空现有内容
+
+            merchants.forEach(merchant => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${merchant.Id}</td>
+                    <td><input type="text" value="${merchant.name}" data-id="${merchant.Id}" /></td>
+                    <td><input type="password" value="${merchant.password}" data-id="${merchant.Id}" /></td>
+                    <td>
+                        <button onclick="updateMerchant(${merchant.Id})">保存</button>
+                        <button onclick="deleteMerchant(${merchant.Id})">删除</button>
+                    </td>
+                `;
+                merchantList.appendChild(row);
+            });
+        }
+
+        function addMerchant() {
+            // 逻辑来添加新商户
+            alert('添加商户的逻辑');
+        }
+
+        function updateMerchant(id) {
+            // 逻辑来更新商户
+            alert(`更新商户 ID: ${id}`);
+        }
+
+        function deleteMerchant(id) {
+            // 逻辑来删除商户
+            alert(`删除商户 ID: ${id}`);
+        }
+
+        // 页面加载时填充商家信息
+        loadMerchants();
+    </script>
+</body>
+</html>
