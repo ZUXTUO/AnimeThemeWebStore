@@ -190,6 +190,11 @@ function loadOrderDetail(orderId) {
                     const price = parseFloat(order.price); // 获取商品价格并转换为数字
                     const totalPrice = (price * order.num); // 计算应付款
 
+                    // 设置倒计时开始时间
+                    const orderTime = new Date(order.order_time).getTime(); // 获取下单时间
+                    const currentTime = Date.now();
+                    const timeLeft = 30 * 60 * 1000 - (currentTime - orderTime); // 计算剩余时间（30分钟）
+
                     orderContainer.innerHTML = `
                         <div class="order-item">
                             <img src="${imgSrc}" alt="${order.commodity_title}">
@@ -226,11 +231,13 @@ function loadOrderDetail(orderId) {
                     const uploadContainer = document.createElement('div');
                     uploadContainer.className = 'upload-container';
                     if (orderStatus == 0) {
+                        startCountdown(timeLeft > 0 ? Math.floor(timeLeft / 1000) : 0); // 启动倒计时，转换为秒
                         uploadContainer.innerHTML = `
                             <input type="file" id="image-input" multiple />
                             <button onclick="uploadImages()">确认上传</button>
                             <div id="uploaded-images" class="uploaded-images"></div>
                             <div id="no-uploaded-images" style="color: red; font-weight: bold;">付款后请将完整的支付截图传上来，一定要是带转账单号的截图，点击转账页面的消息就有。</div>
+                            <div id="countdown" style="text-align: center; font-weight: bold; color: red; margin-top: 10px;"></div>
                         `;
                         document.getElementById('pay-button').style.display = 'inline-block';
                     } else {
@@ -267,6 +274,21 @@ function loadOrderDetail(orderId) {
                 .catch(error => console.error('获取订单状态失败:', error));
         })
         .catch(error => console.error('加载订单详情失败:', error));
+}
+
+function startCountdown(duration) {
+    console.warn("");
+    let timer = duration, minutes, seconds;
+    const countdownElement = document.getElementById('countdown');
+    const interval = setInterval(() => {
+        minutes = parseInt(timer / 60, 10);
+        seconds = parseInt(timer % 60, 10);
+        countdownElement.textContent = `订单关闭倒计时: ${minutes} 分 ${seconds} 秒`;
+        if (--timer < 0) {
+            clearInterval(interval);
+            countdownElement.textContent = "已超时，订单关闭";
+        }
+    }, 1000);
 }
 
         function loadUploadedImages(orderId) {
@@ -434,11 +456,15 @@ function loadOrderDetail(orderId) {
 </head>
 <body>
     <div class="header">订单详情</div>
+    <div class="test-container">
+        <div id="countdown" style="text-align: center; font-weight: bold; color: rgb(242, 255, 0); margin-top: 0px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);"></div>
+    </div>
     <div class="order-detail-container" id="order-detail-container"></div>
     <button id="cancel-button" onclick="cancelOrder()">取消订单</button>
     <button id="back-button" onclick="location.href='orders.html'">返回订单列表</button>
     <button id="pay-button" onclick="confirmPayment()">确认支付</button>
     <button id="waybill-button" onclick="confirmReceive()">确认收货</button>
     <div class="message-box" id="message-box"></div>
+    
 </body>
 </html>
