@@ -194,8 +194,8 @@
 <body>
     <div class="product-detail" id="product-detail"></div>
     <div id="footer">
-        <div class="footer-button" onclick="window.history.back()">返回</div>
-        <div class="footer-button add-to-cart" id="addToCartBtn" onclick="goToPreviousBindingProduct()">前绑定商品</div>
+        <div class="footer-button" onclick="location.href='index.html'">主页</div>
+        <div class="footer-button add-to-cart" id="addToCartBtn" onclick="goToPreviousBindingProduct()">前往绑定商品</div>
         <div class="footer-button buy-now" id="buyNowBtn" onclick="openBuyNowModal()">购买</div>
     </div>
     <div class="notification" id="notification">库存不足</div>
@@ -235,7 +235,7 @@
                     console.warn("有支付定金",previousOrderNum);
                 } else {
                     console.warn("没有支付定金");
-                    showNotification('这是绑定商品，请先支付前一个商品的订单');
+                    showNotification('这是一个绑定商品，请先支付前一个商品的订单');
                     document.getElementById('buyNowBtn').classList.add('disabled');
                 }
                 displayProduct();

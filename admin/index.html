@@ -146,6 +146,7 @@
                 displayMerchants(result.merchants);
                 document.getElementById('addMerchantBtn').style.display = 'block';
                 document.getElementById('goToMerchantBtn').style.display = 'block';
+                document.getElementById('goToUserBtn').style.display = 'block';
             } else {
                 alert(result.message);
             }
@@ -170,6 +171,7 @@
                     displayMerchants(result.merchants);
                     document.getElementById('addMerchantBtn').style.display = 'block';
                     document.getElementById('goToMerchantBtn').style.display = 'block';
+                    document.getElementById('goToUserBtn').style.display = 'block';
                 } else {
                     alert(result.message);
                 }
@@ -333,6 +335,7 @@
 
     <button id="addMerchantBtn" style="display:none;" onclick="openModal()">添加商家</button>
     <button id="goToMerchantBtn" style="display:none;" onclick="window.location.href='Merchants/index.html'">转到商户端</button>
+    <button id="goToUserBtn" style="display:none;" onclick="window.location.href='admin_user.html'">修改用户信息</button>
 
     <div id="merchantModal" class="modal">
         <div class="modal-content">
