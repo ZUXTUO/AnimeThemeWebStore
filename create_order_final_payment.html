@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建订单-绑定订单</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-image: url('img/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+        .order-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 800px;
+        }
+        .header {
+            text-align: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: black;
+            margin-bottom: 20px;
+        }
+        .order-item {
+            background-color: white;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            width: 100%;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .input-field {
+            margin: 10px 0;
+            width: 100%;
+        }
+        .input-field label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-field input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+        }
+        #confirm-button, #back-button {
+            background-color: #87CEEB;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        #confirm-button:hover, #back-button:hover {
+            background-color: #00BFFF;
+        }
+        .order-summary {
+            font-size: 1em;
+            margin: 5px 0;
+        }
+        .notification {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #4CAF50; /* 绿色 */
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+        .total_price_text {
+            font-weight: bold;
+            color: rgb(188, 0, 0);
+        }
+    </style>
+</head>
+<body>
+    <div class="order-container">
+        <div class="header">创建订单</div>
+        <div class="order-item">
+            <div class="order-summary">
+                <p>商品ID: <span id="commodity_id_text"></span></p>
+                <p>上一笔绑定商品ID: <span id="deposit_commodity_id_text"></span></p>
+                <p>上一笔绑定订单编号: <span id="deposit_order_id_text"></span></p>
+                <p>商品数量: <span id="num_text"></span></p>
+                <p>商品名称: <span id="commodity_title_text"></span></p>
+                <p>商品单价: <span id="commodity_price_text"></span> 元</p>
+                <p>应付款: <span id="total_price_text" style="color: red; font-weight: bold;"></span> 元</p>
+                <p>商家名称: <span id="merchant_name_text"></span></p>
+            </div>
+            <div class="input-field">
+                <label for="consignee_name">收货人姓名</label>
+                <input type="text" id="consignee_name" required>
+            </div>
+            <div class="input-field">
+                <label for="phone_number">收货人电话</label>
+                <input type="text" id="phone_number" required>
+            </div>
+            <div class="input-field">
+                <label for="delivery_address">收货地址</label>
+                <input type="text" id="delivery_address" required>
+            </div>
+        </div>
+        <div class="button-container">
+            <button id="confirm-button" onclick="createOrder()">确认订单</button>
+            <button id="back-button" onclick="goBack()">返回</button>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        let userId;
+        let commodityTitle;
+        const urlParams = new URLSearchParams(window.location.search);
+        const commodityId = urlParams.get('commodity_id');
+        const merchantsId = urlParams.get('merchant_id');
+        const num = urlParams.get('num');
+        const orderId = urlParams.get('order');
+
+        window.onload = () => {
+            if (!commodityId || !merchantsId || !num || !orderId) {
+                alert('缺少必要的商品信息（商品ID、商家ID、商品数量、绑定商品ID），无法创建订单！');
+                window.location.href = 'orders.html';
+                return;
+            }
+            loadCommodityDetails(commodityId);
+            loadUserInfo();
+        };
+
+        async function loadCommodityDetails(commodityId) {
+            try {
+                const response = await fetch(`./php/getProduct.php?id=${commodityId}`);
+                const data = await response.json();
+
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                const price = parseFloat(data.price); // 获取商品价格并转换为数字
+                const totalPrice = (price * num); // 计算应付款
+
+                document.getElementById('commodity_id_text').textContent = data.Id;
+                document.getElementById('num_text').textContent = num;
+                document.getElementById('commodity_title_text').textContent = data.commodity_title;
+                document.getElementById('commodity_price_text').textContent = price;
+                document.getElementById('total_price_text').textContent = totalPrice; // 显示应付款
+                document.getElementById('merchant_name_text').textContent = data.merchant_name;
+
+                commodityTitle = data.commodity_title;
+
+            } catch (error) {
+                showNotification('获取商品信息失败:', error);
+            }
+        }
+
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('./php/getUserInfo.php');
+                const userInfo = await response.json();
+
+                if (userInfo.error) {
+                    alert(userInfo.error);
+                    return;
+                }
+
+                userId = userInfo.Id; // 存储用户 ID
+                document.getElementById('consignee_name').value = userInfo.consignee_name || '';
+                document.getElementById('phone_number').value = userInfo.phone_number || '';
+                document.getElementById('delivery_address').value = userInfo.delivery_address || '';
+
+                const productResponse = await fetch(`./php/getDepositProduct.php?id=${commodityId}&user_id=${userId}`);
+                const productData = await productResponse.json();
+
+                if (productData.error) throw new Error(productData.error);
+                product = productData;
+                console.warn(product);
+
+                document.getElementById('deposit_commodity_id_text').textContent = product.deposit_commodity_id;
+
+                const exists = product.orders.some(order => order.Id === orderId);
+                if (exists) {
+                    console.log(`订单 ID ${orderId} 存在于订单列表中.`);
+                } else {
+                    showNotification(`订单 ID ${orderId} 不存在于订单列表中.`);
+                    document.getElementById('confirm-button').style.display = 'none';
+                }
+                document.getElementById('deposit_order_id_text').textContent = orderId;
+            } catch (error) {
+                console.error('获取用户信息失败:', error);
+            }
+        }
+
+        function createOrder() {
+            const consigneeName = document.getElementById('consignee_name').value;
+            const phoneNumber = document.getElementById('phone_number').value;
+            const deliveryAddress = document.getElementById('delivery_address').value;
+
+            if (!consigneeName || !phoneNumber || !deliveryAddress) {
+                alert('请确保所有必填项都已填写。');
+                return;
+            }
+
+            const orderData = {
+                user_id: userId,
+                commodity_id: commodityId,
+                commodity_title: commodityTitle,
+                num: num,
+                merchants_id: merchantsId,
+                delivery_address: deliveryAddress,
+                consignee_name: consigneeName,
+                phone_number: phoneNumber,
+                order_status: 0, // 初始状态为未支付
+                deposit_order: orderId //定金订单编号
+            };
+
+            console.log('即将发送的订单数据:', orderData);
+
+            fetch('./php/order/order_create_final_payment.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('订单创建成功！订单号: ' + data.order_id);
+                    setTimeout(() => {
+                        window.location.href = 'orders.html';
+                    }, 1000);
+                } else {
+                    showNotification('订单创建失败: ' + data.error);
+                }
+            })
+            .catch(error => {
+                showNotification('创建订单失败，请稍后再试。');
+                console.error('创建订单失败:', error);
+            });
+        }
+
+        function goBack() {
+            window.history.back(); // 返回到上一页
+        }
+
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.display = 'block';
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000); // 3秒后隐藏
+        }
+    </script>
+</body>
+</html>

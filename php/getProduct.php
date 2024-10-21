@@ -9,9 +9,8 @@ if (!isset($_GET['id'])) {
 $productId = intval($_GET['id']);
 
 try {
-    // 更新查询语句，以包含 inventory 和 sold 字段
     $stmt = $pdo->prepare("
-        SELECT Id, merchants_id, commodity_title, commodity_info, price, inventory, sold 
+        SELECT *
         FROM commodity 
         WHERE Id = :id
     ");

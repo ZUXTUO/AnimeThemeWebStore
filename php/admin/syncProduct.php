@@ -13,16 +13,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $price = $data['price'];
     $inventory = $data['inventory'];
     $view = $data['view'];
+    $need_deposit = $data['need_deposit']; // 新增字段
+    $deposit_commodity_id = $data['deposit_commodity_id']; // 新增字段
 
     try {
         // 更新商品信息
-        $stmt = $pdo->prepare("UPDATE commodity SET commodity_title = :commodity_title, commodity_info = :commodity_info, price = :price, inventory = :inventory, view = :view WHERE id = :id");
+        $stmt = $pdo->prepare("UPDATE commodity SET 
+            commodity_title = :commodity_title, 
+            commodity_info = :commodity_info, 
+            price = :price, 
+            inventory = :inventory, 
+            view = :view, 
+            need_deposit = :need_deposit, 
+            deposit_commodity_id = :deposit_commodity_id 
+            WHERE Id = :id");
+
+        // 绑定参数
         $stmt->bindParam(':commodity_title', $commodity_title);
         $stmt->bindParam(':commodity_info', $commodity_info);
         $stmt->bindParam(':price', $price);
         $stmt->bindParam(':inventory', $inventory);
         $stmt->bindParam(':view', $view);
+        $stmt->bindParam(':need_deposit', $need_deposit); // 绑定新的字段
+        $stmt->bindParam(':deposit_commodity_id', $deposit_commodity_id); // 绑定新的字段
         $stmt->bindParam(':id', $id);
+        
+        // 执行语句
         $stmt->execute();
 
         echo json_encode(['success' => true, 'message' => '商品信息同步成功']);

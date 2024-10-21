@@ -1,48 +1,62 @@
 [中文](../README.md)
 [日本語](README_JA.md)
 
-# AnimeThemeWebStore
-A simple online store themed around anime, this project is easy to deploy, making it suitable for users who find it difficult to apply for payment interfaces.
+# Anime Theme Web Store
+A simple online store themed around anime. The deployment process is straightforward, making it suitable for users who have difficulty applying for payment interfaces.
 
 ### Project Features
-- **Easy Deployment**: Designed for quick setup, primarily for educational purposes.
+- **Easy Deployment**: Designed for quick onboarding, primarily for educational purposes.
 - **Recommended Environment**:  
   - **Web Server**: `Apache 2.4.39`
   - **PHP Version**: `7.3.4nts`
   - **Database**: `MySQL 5.7.26`
 
 ### Usage Instructions
-#### For Windows Users
-If manual configuration seems troublesome, you can use the Xiaopi panel for quick deployment.
+#### Windows Users
+If manual configuration is cumbersome, you can use the XIAO PI panel for quick deployment.
 
-#### For Linux Users
-Please set up your server environment according to your needs.
+#### Linux Users
+Please set up the server environment according to your needs.
 
 ### Database Import
 1. Create a database named `shop` in MySQL.
-2. Import the `./database/shop.sql` file into that database.
-3. Modify the database username and password, updating the relevant configuration in `./php/db.php`.
+2. Import the `./database/shop.sql` file into the database.
+3. Modify the database username and password, and update the relevant configurations in `./php/db.php`.
 
-### Admin Interface
-The admin management interface is located in the `admin` directory. Features are still being improved, so stay tuned for updates!
+### Admin Panel
+The admin management interface is located in the `admin` directory, and functionality is still under improvement; stay tuned for updates!
 
-### Merchant Interface
-The merchant management interface is found in `admin/Merchants`. Features are also under development. The management is divided into product management (`index.html`), order management (`manager.html`), and automated task handling (`order_time_management.html`). Automated tasks include timeout detection for unpaid orders (half an hour) and preventing negative sales.
+Test Account:
+- Admin Username (default): 1024
+- Admin Password (default): 123456
 
-### Client Interface
-1. Login Page (currently does not allow password changes; email or phone binding for unregistered users is under discussion) `login.html`
-2. Registration Page (for account creation) `register.html`
-3. Product Page (the main page displaying all products in random order) `index.html`
-4. Product Recommendation Page (one product at a time) `host.html`
-5. Product Detail Page (includes add to cart and direct purchase functions) `commodity.html`
-6. Merchant Detail Page (displays all products from the merchant) `merchantPage.html`
-7. Product Search Page (search for products using keywords) `search.html`
-8. Cart Page (all products added to the cart) `cart.html`
-9. Account Page (displays basic user information and functions) `user.html`
-10. Account Modification Page (modify user information) `modify_user_information.html`
-11. Order Management Page (view all orders) `orders.html`
-12. Order Detail Page (view contents of a specific order) `order_detail.html`
-13. Create Order Page (purchase page) `create_order.html`
+### Merchant Panel
+The merchant management interface is located in `admin/Merchants`, and functionality is still under improvement; stay tuned for updates!
+Merchant management includes product management (`index.html`), order management (`manager.html`), and automated task handling (`order_time_management.html`).
+Automated tasks include detecting unpaid order timeouts (30 minutes) and preventing negative sales.
+
+Test Account:
+- Merchant Account: 1001 (or 1002, 1003)
+- Merchant Password: 123456
+
+### Client Side
+1. Login page (password modification is not yet available due to the need for binding an email or phone number, so this feature is under discussion) `login.html`
+2. Registration page (for account registration) `register.html`
+3. Product page (main page displaying all products in random order) `index.html`
+4. Product recommendation page (individual product recommendations) `host.html`
+5. Product detail page (includes add to cart and direct purchase features) `commodity.html`
+6. Merchant detail page (shows all products from a merchant) `merchantPage.html`
+7. Product search page (allows keyword search for products) `search.html`
+8. Cart page (displays all added items) `cart.html`
+9. Account page (shows basic user information and features) `user.html`
+10. Account modification page (for updating user information) `modify_user_information.html`
+11. Order management page (view all orders) `orders.html`
+12. Order detail page (view details of a specific order) `order_detail.html`
+13. Create order page (purchase page) `create_order.html`
+
+Test Account:
+- Client Account: 1
+- Client Password: 123456
 
 ## Notes
-This project is for educational purposes only and may not be suitable for direct commercial use. Please use it with caution!
+This project is for educational purposes only and may not be suitable for direct commercial operation. Please use with caution!

@@ -253,6 +253,16 @@ function loadOrderDetail(orderId) {
                     }
                     orderContainer.appendChild(uploadContainer);
                     loadUploadedImages(orderId);
+
+                    if (orderStatus == 0) {
+                        document.getElementById('cancel-button').textContent = '取消订单';
+                        document.getElementById('cancel-button').style.backgroundColor = '';
+                        document.getElementById('cancel-button').style.color = ''; // 恢复默认颜色
+                    } else if (orderStatus == 1) {
+                        document.getElementById('cancel-button').textContent = '申请退款';
+                        document.getElementById('cancel-button').style.backgroundColor = '#ff0000'; // 红色
+                        document.getElementById('cancel-button').style.color = 'white'; // 文字颜色为白色
+                    }
                 })
                 .catch(error => console.error('获取订单状态失败:', error));
         })

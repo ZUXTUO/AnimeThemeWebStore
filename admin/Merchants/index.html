@@ -47,6 +47,8 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
+            overflow-y: auto; /* 添加垂直滚动条 */
+            display: block; /* 使其能滚动 */
         }
         th, td {
             border: 1px solid #555;
@@ -131,6 +133,11 @@
     </div>
     
     <div id="product-list" style="display:none;">
+
+        <div id="search-container">
+            <input type="text" id="search-input" placeholder="搜索商品信息..." oninput="searchProducts()">
+        </div>
+        
         <h2>商品列表</h2>
         <button onclick="reloadImages()">重新加载图片缓存</button>
         <button onclick="showAddProductModal()">添加商品</button>
@@ -147,6 +154,8 @@
                     <th>可见</th>
                     <th>主图</th>
                     <th>详情图</th>
+                    <th>需要定金</th>
+                    <th>定金商品 ID</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -215,6 +224,7 @@
         async function loadProducts(merchantId) {
             const response = await fetch('../../php/admin/getMerchantShop.php?merchantId=' + merchantId);
             productsData = await response.json();
+            console.warn(productsData);
             displayProducts();
         }
 
@@ -226,39 +236,11 @@
             const paginatedItems = productsData.slice(start, end);
 
             paginatedItems.forEach(product => {
-                const mainImageSrc = product.merchants_id && product.Id
-                    ? `../../commodity/${product.merchants_id}/${product.Id}/main.jpg`
-                    : '../../commodity/temp.jpg';
-                const infoImageSrc = product.merchants_id && product.Id
-                    ? `../../commodity/${product.merchants_id}/${product.Id}/info.jpg`
-                    : '../../commodity/temp.jpg';
-
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${product.Id}</td>
-                    <td><textarea class="editable textarea" onchange="updateProduct(${product.Id}, 'commodity_title', this.value)">${product.commodity_title}</textarea></td>
-                    <td><textarea class="editable textarea" onchange="updateProduct(${product.Id}, 'commodity_info', this.value)">${product.commodity_info}</textarea></td>
-                    <td><input type="number" class="editable" value="${product.price}" onchange="updateProduct(${product.Id}, 'price', this.value)"></td>
-                    <td><input type="number" class="editable" value="${product.inventory}" onchange="updateProduct(${product.Id}, 'inventory', this.value)"></td>
-                    <td>
-                        <select onchange="updateProduct(${product.Id}, 'view', this.value)">
-                            <option value="1" ${product.view == 1 ? 'selected' : ''}>是</option>
-                            <option value="0" ${product.view == 0 ? 'selected' : ''}>否</option>
-                        </select>
-                    </td>
-                    <td>
-                        <img src="${mainImageSrc}" class="product-image" alt="主图" onclick="selectImage(${product.Id}, 'main')">
-                        <input type="file" id="main-image-${product.Id}" style="display:none;" accept="image/*" onchange="uploadImage(${product.Id}, 'main', this.files[0], this)">
-                    </td>
-                    <td>
-                        <img src="${infoImageSrc}" class="product-image" alt="详情图" onclick="selectImage(${product.Id}, 'info')">
-                        <input type="file" id="info-image-${product.Id}" style="display:none;" accept="image/*" onchange="uploadImage(${product.Id}, 'info', this.files[0], this)">
-                    </td>
-                    <td><button onclick="syncProduct(${product.Id})">同步</button></td>`;
+                const row = createProductRow(product);
                 productList.appendChild(row);
             });
 
-            setupPagination();
+            setupPagination(productsData.length);
         }
 
         function setupPagination() {
@@ -403,8 +385,11 @@
                 commodity_info: inputs[1].value,
                 price: inputs[2].value,
                 inventory: inputs[3].value,
-                view: row.querySelector('select').value
+                view: row.querySelector('select').value,
+                need_deposit: row.querySelector('select[onchange*="need_deposit"]').value,
+                deposit_commodity_id: inputs[4].value
             };
+
 
             const response = await fetch('../../php/admin/syncProduct.php', {
                 method: 'POST',
@@ -416,6 +401,71 @@
 
             const result = await response.json();
             alert(result.message);
+        }
+
+        function createProductRow(product) {
+            const mainImageSrc = product.merchants_id && product.Id
+                ? `../../commodity/${product.merchants_id}/${product.Id}/main.jpg`
+                : '../../commodity/temp.jpg';
+            const infoImageSrc = product.merchants_id && product.Id
+                ? `../../commodity/${product.merchants_id}/${product.Id}/info.jpg`
+                : '../../commodity/temp.jpg';
+
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${product.Id}</td>
+                <td><textarea class="editable textarea" onchange="updateProduct(${product.Id}, 'commodity_title', this.value)">${product.commodity_title}</textarea></td>
+                <td><textarea class="editable textarea" onchange="updateProduct(${product.Id}, 'commodity_info', this.value)">${product.commodity_info}</textarea></td>
+                <td><input type="number" class="editable" value="${product.price}" onchange="updateProduct(${product.Id}, 'price', this.value)"></td>
+                <td><input type="number" class="editable" value="${product.inventory}" onchange="updateProduct(${product.Id}, 'inventory', this.value)"></td>
+                <td>
+                    <select onchange="updateProduct(${product.Id}, 'view', this.value)">
+                        <option value="1" ${product.view == 1 ? 'selected' : ''}>是</option>
+                        <option value="0" ${product.view == 0 ? 'selected' : ''}>否</option>
+                    </select>
+                </td>
+                <td>
+                    <img src="${mainImageSrc}" class="product-image" alt="主图" onclick="selectImage(${product.Id}, 'main')">
+                    <input type="file" id="main-image-${product.Id}" style="display:none;" accept="image/*" onchange="uploadImage(${product.Id}, 'main', this.files[0], this)">
+                </td>
+                <td>
+                    <img src="${infoImageSrc}" class="product-image" alt="详情图" onclick="selectImage(${product.Id}, 'info')">
+                    <input type="file" id="info-image-${product.Id}" style="display:none;" accept="image/*" onchange="uploadImage(${product.Id}, 'info', this.files[0], this)">
+                </td>
+                <td>
+                    <select onchange="updateProduct(${product.Id}, 'need_deposit', this.value)">
+                        <option value="1" ${product.need_deposit == 1 ? 'selected' : ''}>是</option>
+                        <option value="0" ${product.need_deposit == 0 ? 'selected' : ''}>否</option>
+                    </select>
+                </td>
+                <td><input type="number" class="editable" value="${product.deposit_commodity_id}" onchange="updateProduct(${product.Id}, 'deposit_commodity_id', this.value)"></td>
+                <td><button onclick="syncProduct(${product.Id})">同步</button></td>`;
+            return row;
+        }
+
+        function searchProducts() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filteredProducts = productsData.filter(product => 
+                product.commodity_title.toLowerCase().includes(query) ||
+                product.commodity_info.toLowerCase().includes(query)
+            );
+            displayFilteredProducts(filteredProducts);
+        }
+
+        function displayFilteredProducts(filteredProducts) {
+            const productList = document.getElementById('products');
+            productList.innerHTML = '';
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const paginatedItems = filteredProducts.slice(start, end);
+
+            paginatedItems.forEach(product => {
+                const row = createProductRow(product);
+                productList.appendChild(row);
+            });
+
+            setupPagination(filteredProducts.length);
         }
 
         function logout() {

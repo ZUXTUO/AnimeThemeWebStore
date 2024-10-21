@@ -93,6 +93,30 @@
 <body>
     <h1>订单管理</h1>
     <div id="order-list">
+        
+        <div style="display: flex; align-items: center; width: 100%;">
+            <label for="search-filter" style="margin-right: 5px; color: #333;">搜索:</label>
+            <select id="search-type" style="margin-right: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 120px;">
+                <option value="orderId">订单号</option>
+                <option value="phoneNumber">手机号</option>
+                <option value="commodityTitle">商品名</option>
+                <option value="userId">用户 ID</option>
+                <option value="consigneeName">收件人姓名</option>
+                <option value="deliveryAddress">收货地址</option>
+            </select>
+            <input type="text" id="search-input" placeholder="请输入搜索内容"
+                   style="padding: 12px; border-radius: 5px; border: 1px solid #ccc; flex: 1; 
+                          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); transition: border 0.3s; 
+                          margin-right: 10px;">
+            <button style="padding: 8px 12px; border: none; border-radius: 5px; 
+                          background-color: #4285f4; color: white; cursor: pointer; 
+                          transition: background-color 0.3s; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); font-size: 14px;"
+                    onmouseover="this.style.backgroundColor='#357ae8';" 
+                    onmouseout="this.style.backgroundColor='#4285f4';" 
+                    onclick="searchOrders()">搜索</button>
+        </div>
+        
+        
         <h2>订单列表</h2>
         <label for="order-status-filter">筛选订单状态：</label>
         <select id="order-status-filter" onchange="filterOrders()">
@@ -103,8 +127,8 @@
             <!-- <option value="3">确认成品信息</option> -->
             <!-- <option value="4">已确认成品信息</option> -->
             <!-- <option value="5">待支付尾款信息</option> -->
-            <!-- <option value="6">已支付尾款信息，审核中</option> -->
-            <!-- <option value="7">已支付尾款信息，审核成功</option> -->
+            <option value="6">已支付尾款信息，审核中</option>
+            <option value="7">已支付尾款信息，审核成功</option>
             <option value="8">待发货</option>
             <option value="9">已发货</option>
             <option value="10">已送达</option>
@@ -116,7 +140,8 @@
             <option value="16">已支付，但退款中</option>
             <option value="17">已支付，退款成功</option>
         </select>
-        
+        <button id="export-orders" onclick="exportOrders()">导出订单</button>
+
         <button style="background-color: #dc3545; color: white;" onclick="location.href='index.html'">商品管理</button>
         <table>
             <thead>
@@ -157,8 +182,8 @@
             }
         };
 
-        async function loadOrders(merchantId) {
-            const response = await fetch(`../../php/admin/getOrders.php?merchantId=${merchantId}&page=${currentPage}&limit=${itemsPerPage}&status=${selectedStatus}`);
+        async function loadOrders(merchantId, searchType = '', searchInput = '') {
+            const response = await fetch(`../../php/admin/getOrders.php?merchantId=${merchantId}&page=${currentPage}&limit=${itemsPerPage}&status=${selectedStatus}&searchType=${searchType}&searchInput=${encodeURIComponent(searchInput)}`);
             const result = await response.json();
             const orders = result.orders;
             totalOrders = result.total;
@@ -166,6 +191,7 @@
             orderList.innerHTML = '';
 
             for (const order of orders) {
+                //console.warn(order);
                 const row = document.createElement('tr');
                 row.setAttribute('data-order-id', order.Id);
                 row.innerHTML = `
@@ -184,8 +210,11 @@
                     <td><input type="text" class="editable" value="${order.phone_number}" onchange="updateOrder(${order.Id}, 'phone_number', this.value)"></td>
                     <td><input type="text" class="editable" value="${order.delivery_address}" onchange="updateOrder(${order.Id}, 'delivery_address', this.value)"></td>
                     <td><input type="text" class="editable" value="${order.waybill_number}" onchange="updateOrder(${order.Id}, 'waybill_number', this.value)"></td>
-                    <td><button onclick="syncOrder(${order.Id})">同步</button></td>`;
-                
+                    <td>
+                        <button onclick="syncOrder(${order.Id})">同步</button>
+                        ${(order.order_status == 1 || order.order_status == 2) ? `<button onclick="refundOrder(${order.Id})">退款</button>` : ''}
+                </td>`;
+
                 orderList.appendChild(row);
 
                 const images = await loadImages(order.Id);
@@ -216,6 +245,11 @@
             return images;
         }
 
+        function refundOrder(orderId) {
+            alert('退款功能尚未实现', orderId);
+        }
+
+
         function getOrderStatusOptions(selectedStatus) {
             const statusMap = {
                 0: "未支付",
@@ -224,8 +258,8 @@
                 // 3: "确认成品信息",
                 // 4: "已确认成品信息",
                 // 5: "待支付尾款信息",
-                // 6: "已支付尾款信息，审核中",
-                // 7: "已支付尾款信息，审核成功",
+                6: "已支付尾款信息，审核中",
+                7: "已支付尾款信息，审核成功",
                 8: "待发货",
                 9: "已发货",
                 10: "已送达",
@@ -359,6 +393,20 @@
             currentPage = 1;
             const merchantId = localStorage.getItem('merchantId');
             loadOrders(merchantId);
+        }
+
+        function exportOrders() {
+            const merchantId = localStorage.getItem('merchantId');
+            const status = selectedStatus;
+            const url = `../../php/admin/exportOrders.php?merchantId=${merchantId}&status=${status}`;
+            window.location.href = url; // 直接跳转到导出 URL
+        }
+
+        function searchOrders() {
+            const searchType = document.getElementById('search-type').value;
+            const searchInput = document.getElementById('search-input').value;
+            const merchantId = localStorage.getItem('merchantId');
+            loadOrders(merchantId, searchType, searchInput);
         }
 
         function logout() {

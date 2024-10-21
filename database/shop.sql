@@ -1,5 +1,5 @@
 ﻿# Host: localhost  (Version: 5.7.26)
-# Date: 2024-10-19 19:15:02
+# Date: 2024-10-21 20:53:30
 # Generator: MySQL-Front 5.3  (Build 4.234)
 
 /*!40101 SET NAMES utf8 */;
@@ -13,14 +13,14 @@ CREATE TABLE `admin` (
   `Id` int(11) NOT NULL AUTO_INCREMENT,
   `password` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1025 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci ROW_FORMAT=DYNAMIC;
+) ENGINE=MyISAM AUTO_INCREMENT=1025 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Data for table "admin"
 #
 
 /*!40000 ALTER TABLE `admin` DISABLE KEYS */;
-INSERT INTO `admin` VALUES (1024,'root');
+INSERT INTO `admin` VALUES (1024,'123456');
 /*!40000 ALTER TABLE `admin` ENABLE KEYS */;
 
 #
@@ -34,18 +34,20 @@ CREATE TABLE `commodity` (
   `commodity_title` varchar(255) DEFAULT NULL COMMENT '商品名',
   `commodity_info` varchar(255) DEFAULT NULL COMMENT '商品信息',
   `price` float(6,2) DEFAULT NULL COMMENT '价格',
-  `inventory` int(11) DEFAULT NULL COMMENT '库存',
-  `sold` int(11) DEFAULT NULL COMMENT '已售',
+  `inventory` int(11) NOT NULL DEFAULT '0' COMMENT '库存',
+  `sold` int(11) NOT NULL DEFAULT '0' COMMENT '已售',
   `view` tinyint(1) DEFAULT NULL COMMENT '是否可见',
+  `need_deposit` tinyint(1) NOT NULL DEFAULT '0' COMMENT '是否需要先付定金',
+  `deposit_commodity_id` int(11) DEFAULT NULL COMMENT '定金商品ID',
   PRIMARY KEY (`Id`)
-) ENGINE=MyISAM AUTO_INCREMENT=28 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
 
 #
 # Data for table "commodity"
 #
 
 /*!40000 ALTER TABLE `commodity` DISABLE KEYS */;
-INSERT INTO `commodity` VALUES (1,'1001','测试商品1','这是商品详情1',30.00,100,0,1),(2,'1002','测试商品2','这是商品详情2',30.00,100,0,1),(3,'1003','测试商品3','这是商品详情3',30.00,100,0,1);
+INSERT INTO `commodity` VALUES (1,'1001','测试商品1','测试信息1',10.00,100,999,1,0,NULL),(2,'1002','测试商品2','测试信息2',20.00,100,999,1,0,NULL),(3,'1003','测试商品3','测试信息3',30.00,100,999,1,1,2);
 /*!40000 ALTER TABLE `commodity` ENABLE KEYS */;
 
 #
@@ -58,14 +60,14 @@ CREATE TABLE `merchants` (
   `name` varchar(255) DEFAULT NULL COMMENT '商户名',
   `password` varchar(255) DEFAULT NULL COMMENT '商户密码',
   PRIMARY KEY (`Id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1004 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=1012 DEFAULT CHARSET=utf8;
 
 #
 # Data for table "merchants"
 #
 
 /*!40000 ALTER TABLE `merchants` DISABLE KEYS */;
-INSERT INTO `merchants` VALUES (1001,'商家1','123456'),(1002,'商家2','123456'),(1003,'商家3','123456');
+INSERT INTO `merchants` VALUES (1001,'测试商家1','123456'),(1002,'测试商家2','123456'),(1003,'测试商家3','123456');
 /*!40000 ALTER TABLE `merchants` ENABLE KEYS */;
 
 #
@@ -87,14 +89,13 @@ CREATE TABLE `orders` (
   `delivery_address` varchar(255) CHARACTER SET utf8 DEFAULT NULL COMMENT '收货地址',
   `waybill_number` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=MyISAM AUTO_INCREMENT=36 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=114 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Data for table "orders"
 #
 
 /*!40000 ALTER TABLE `orders` DISABLE KEYS */;
-INSERT INTO `orders` VALUES (35,1,1,'测试商品1',1,1001,15,'2024-10-17 13:17:56','我叫测试','1234567890','测试地址',NULL);
 /*!40000 ALTER TABLE `orders` ENABLE KEYS */;
 
 #
@@ -108,7 +109,7 @@ CREATE TABLE `shopping_car` (
   `commodity_id` int(11) DEFAULT NULL COMMENT '商品ID',
   `num` int(4) NOT NULL DEFAULT '0' COMMENT '商品数量',
   PRIMARY KEY (`Id`)
-) ENGINE=MyISAM AUTO_INCREMENT=41 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=MyISAM AUTO_INCREMENT=47 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 
 #
 # Data for table "shopping_car"
@@ -140,5 +141,5 @@ CREATE TABLE `user` (
 #
 
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'测试账号','test','test@test.com','1111','1111','我叫测试','1234567890','测试地址');
+INSERT INTO `user` VALUES (1,'测试账号','123456','123456@qq.com','1234567890','123456','测试','1234567890','北京');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
