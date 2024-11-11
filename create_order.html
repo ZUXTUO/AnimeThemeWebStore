@@ -209,6 +209,13 @@
                 alert('请确保所有必填项都已填写。');
                 return;
             }
+			
+			// 验证手机号是否为11位数字
+			const phonePattern = /^\d{11}$/;
+			if (!phonePattern.test(phoneNumber)) {
+				alert('手机号必须是11位数字');
+				return;
+			}
 
             const orderData = {
                 user_id: userId,

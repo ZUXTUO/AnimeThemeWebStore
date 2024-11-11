@@ -156,6 +156,15 @@
         }
 
         async function saveChanges() {
+		    const phoneNumber = document.getElementById('phone_number').value;
+    
+			// 验证手机号是否为11位数字
+			const phonePattern = /^\d{11}$/;
+			if (!phonePattern.test(phoneNumber)) {
+				alert('手机号必须是11位数字');
+				return;
+			}
+		
             const userData = {
                 Id: userId,
                 name: document.getElementById('username').value,
