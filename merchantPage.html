@@ -89,29 +89,7 @@
             color: #e74c3c;
             margin: 5px 0;
         }
-        #footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-        }
-        .footer-button {
-            padding: 12px;
-            cursor: pointer;
-            text-align: center;
-            flex: 1;
-            border-radius: 10px;
-            transition: background-color 0.3s;
-        }
-        .footer-button:hover {
-            background-color: rgba(0, 0, 0, 0.1);
-        }
+        /* 底部导航栏样式已移至 footer.js */
         @media (max-width: 600px) {
             .product-card {
                 min-width: 120px;
@@ -125,11 +103,8 @@
         <h1 id="merchant-name">加载商家信息...</h1>
     </div>
     <div id="product-container"></div>
-    <div id="footer">
-        <div class="footer-button" onclick="location.href='index.html'">主页</div>
-        <div class="footer-button" onclick="location.href='cart.html'">购物车</div>
-        <div class="footer-button" onclick="location.href='user.html'">我的</div>
-    </div>
+    <!-- 底部导航栏通过 footer.js 自动加载 -->
+    <script src="footer.js"></script>
     <script>
         const urlParams = new URLSearchParams(window.location.search);
         const merchantId = urlParams.get('id');

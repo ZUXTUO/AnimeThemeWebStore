@@ -8,11 +8,24 @@ $username = $_POST['username'];
 $password = $_POST['password'];
 $avatar = $_FILES['avatar'] ?? null; // 使用 null 合并运算符
 
-$stmt = $pdo->prepare("SELECT * FROM user WHERE Id = :customId");
-$stmt->execute(['customId' => $customId]);
+// 开启事务
+try {
+    $pdo->beginTransaction();
+    
+    // 使用 FOR UPDATE 锁定记录，防止并发注册
+    $stmt = $pdo->prepare("SELECT * FROM user WHERE Id = :customId FOR UPDATE");
+    $stmt->execute(['customId' => $customId]);
 
-if ($stmt->rowCount() > 0) {
-    echo '用户ID已存在';
+    if ($stmt->rowCount() > 0) {
+        $pdo->rollBack();
+        echo '用户ID已存在';
+        exit();
+    }
+} catch (PDOException $e) {
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    echo '注册失败: ' . $e->getMessage();
     exit();
 }
 
@@ -38,8 +51,12 @@ imagedestroy($resizedImage);
 
 $stmt = $pdo->prepare("INSERT INTO user (Id, name, password) VALUES (:customId, :username, :password)");
 if ($stmt->execute(['customId' => $customId, 'username' => $username, 'password' => $password])) {
+    // 提交事务
+    $pdo->commit();
     echo '1'; // 注册成功返回数字1
 } else {
+    // 回滚事务
+    $pdo->rollBack();
     echo '注册失败: ' . $stmt->errorInfo()[2];
 }
 

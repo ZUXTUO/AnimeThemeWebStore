@@ -3,199 +3,502 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>商城页面</title>
+    <title>商城 - 精选好物</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
+        * {
             margin: 0;
-            font-family: 'Arial', sans-serif;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #7b68ee;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ff9800;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-color: #e0e6ed;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('img/bg.jpg');
             background-size: cover;
             background-position: center;
-            height: 100vh;
+            background-attachment: fixed;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
             padding: 15px;
-            box-sizing: border-box;
+            padding-bottom: 80px; /* 为底部导航栏留空间 */
         }
+
+        /* 顶部搜索栏 */
+        .header {
+            margin-bottom: 15px;
+            animation: fadeInDown 0.6s ease;
+        }
+
         #search-bar {
             display: flex;
             align-items: center;
-            background-color: rgba(255, 255, 255, 0.9);
-            border: 1px solid #ddd;
-            border-radius: 20px;
-            padding: 10px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            background: var(--card-bg);
+            border: 2px solid rgba(74, 144, 226, 0.2);
+            border-radius: 16px;
+            padding: 12px 16px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
         }
+
+        #search-bar:focus-within {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1), var(--shadow);
+        }
+
+        .search-icon {
+            color: var(--primary-color);
+            font-size: 1.2em;
+            margin-right: 12px;
+        }
+
         #search-input {
             border: none;
             outline: none;
             flex-grow: 1;
-            padding: 5px;
-            padding-right: 10px;
-            border-radius: 10px;
-            margin-right: 8px;
+            padding: 6px 0;
+            font-size: 1em;
+            background: transparent;
+            color: var(--text-primary);
         }
+
+        #search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
         #search-button {
-            background-color: #007bff;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             border: none;
             border-radius: 10px;
-            padding: 8px 12px;
+            padding: 8px 20px;
             cursor: pointer;
-            transition: background-color 0.3s;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
+
         #search-button:hover {
-            background-color: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.4);
         }
+
+        #search-button:active {
+            transform: translateY(0);
+        }
+
+        /* 商品容器 */
         #product-container {
-            background-color: rgba(255, 255, 255, 0.8);
-            border-radius: 15px;
-            padding: 8px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 20px;
+            padding: 12px;
+            box-shadow: var(--shadow-lg);
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            height: calc(100vh - 80px - 60px - 15px);
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px;
+            flex: 1;
             overflow-y: auto;
-            box-sizing: border-box;
+            animation: fadeInUp 0.6s ease;
         }
+
+        /* 滚动条样式 */
+        #product-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #product-container::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        #product-container::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+        }
+
+        /* 商品卡片 */
         .product-card {
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            padding: 10px;
+            background: white;
+            border-radius: 16px;
+            padding: 12px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            align-items: center;
-            min-height: 320px;
-            flex-grow: 1;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
         }
-        img {
-            max-width: 100%;
-            max-height: 60%;
-            height: auto;
-            border-radius: 10px;
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: opacity 0.3s ease;
         }
-        h1 {
-            font-size: 1.2em;
-            margin: 5px 0;
-            color: #333;
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(74, 144, 226, 0.2);
+            border-color: var(--primary-color);
         }
-        .description {
-            font-size: 0.9em;
-            color: #555;
+
+        .product-card:hover::before {
+            opacity: 1;
+        }
+
+        .product-image-container {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            background: linear-gradient(135deg, #f5f7fa, #e8ebef);
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+
+        .product-card img.loaded {
+            opacity: 1;
+        }
+
+        .product-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .product-title {
+            font-size: 1em;
+            font-weight: 600;
+            margin: 8px 0;
+            color: var(--text-primary);
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
-            max-width: 100%;
         }
-        .price {
-            font-size: 1.8em;
-            color: #e74c3c;
-            margin: 5px 0;
+
+        .product-description {
+            font-size: 0.85em;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin-bottom: 8px;
         }
-        #footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+
+        .product-footer {
             display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
+            justify-content: space-between;
+            align-items: center;
+            margin-top: auto;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-color);
         }
-        .footer-button {
-            padding: 12px;
-            cursor: pointer;
-            text-align: center;
-            flex: 1;
-            border-radius: 10px;
-            transition: background-color 0.3s;
+
+        .product-price {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: var(--danger-color);
+            display: flex;
+            align-items: baseline;
+            gap: 2px;
         }
-        .footer-button:hover {
-            background-color: rgba(0, 0, 0, 0.1);
+
+        .price-symbol {
+            font-size: 0.7em;
         }
-        @media (max-width: 600px) {
+
+        .product-cart-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover .product-cart-icon {
+            transform: scale(1.1) rotate(15deg);
+        }
+
+        /* 加载状态 */
+        .loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(74, 144, 226, 0.2);
+            border-top-color: var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 空状态 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-icon {
+            font-size: 4em;
+            color: var(--border-color);
+            margin-bottom: 16px;
+        }
+
+        .empty-text {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+
+        /* 动画 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 12px;
+                padding-bottom: 75px;
+            }
+
+            #product-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                padding: 10px;
+            }
+
             .product-card {
-                min-width: 120px;
-                height: auto;
+                padding: 10px;
+            }
+
+            .product-title {
+                font-size: 0.9em;
+            }
+
+            .product-price {
+                font-size: 1.2em;
+            }
+
+            .product-cart-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 0.85em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+                padding-bottom: 70px;
+            }
+
+            #search-bar {
+                padding: 10px 12px;
+            }
+
+            #search-button {
+                padding: 6px 16px;
+                font-size: 0.9em;
+            }
+
+            #product-container {
+                padding: 8px;
+                gap: 8px;
+            }
+
+            .product-card {
+                padding: 8px;
+            }
+
+            .product-title {
+                font-size: 0.85em;
+            }
+
+            .product-description {
+                font-size: 0.8em;
+            }
+
+            .product-price {
+                font-size: 1.1em;
             }
         }
     </style>
 </head>
 <body>
-    <div id="search-bar">
-        <input type="text" id="search-input" placeholder="搜索商品...">
-        <button id="search-button">搜索</button>
+    <div class="header">
+        <div id="search-bar">
+            <i class="fas fa-search search-icon"></i>
+            <input type="text" id="search-input" placeholder="搜索您想要的商品...">
+            <button id="search-button">
+                <i class="fas fa-search"></i>
+                <span>搜索</span>
+            </button>
+        </div>
     </div>
-    <div id="product-container"></div>
-    <div id="footer">
-        <div class="footer-button" onclick="location.href='host.html'">推荐</div>
-        <div class="footer-button" onclick="location.href='cart.html'">购物车</div>
-        <div class="footer-button" onclick="location.href='user.html'">我的</div>
+    
+    <div id="product-container">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <div>正在加载商品...</div>
+        </div>
     </div>
+
+    <!-- 底部导航栏通过 footer.js 自动加载 -->
+    <script src="footer.js"></script>
     <script>
         let products = [], merchantNames = {};
-        fetch('./php/shop.php')
-            .then(response => response.json())
-            .then(data => {
-                if (data.error) return console.error(data.error);
+
+        // 加载商品数据
+        async function loadProducts() {
+            try {
+                const response = await fetch('./php/shop.php');
+                const data = await response.json();
+
+                if (data.error) {
+                    showEmptyState('获取商品失败');
+                    console.error(data.error);
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    showEmptyState('暂无商品');
+                    return;
+                }
+
                 products = data;
-                const container = document.getElementById('product-container');
-                container.innerHTML = '';
-                products.forEach(product => {
-                    const productCard = document.createElement('div');
-                    productCard.className = 'product-card';
-                    
-                    const img = document.createElement('img');
-                    img.src = 'commodity/temp.jpg';
-                    img.dataset.src = `/commodity/${product.merchants_id}/${product.Id}/main.jpg`;
-                    
-                    productCard.innerHTML = `
-                        <h1>${product.commodity_title}</h1>
-                        <div class="description">${product.commodity_info}</div>
-                        <div class="price">￥${product.price}</div>`;
-                    
-                    productCard.prepend(img);
-                    productCard.onclick = () => {
-                        location.href = `commodity.html?id=${product.Id}`;
-                    };
-                    container.appendChild(productCard);
-                    imgObserver.observe(img);
-                });
+                displayProducts();
+
+                // 异步加载商家名称
                 const merchantIds = [...new Set(products.map(p => p.merchants_id))];
-                return Promise.all(merchantIds.map(id => getMerchantName(id)));
-            })
-            .then(names => {
+                const names = await Promise.all(merchantIds.map(id => getMerchantName(id)));
                 names.forEach(name => { merchantNames[name.id] = name.name; });
-                updateProductDetails();
-            })
-            .catch(error => console.error('获取商品数据失败:', error));
 
-        document.getElementById('search-button').addEventListener('click', () => {
-            const searchTerm = document.getElementById('search-input').value.trim();
-            if (searchTerm) {
-                location.href = `search.html?info=${encodeURIComponent(searchTerm)}`;
+            } catch (error) {
+                showEmptyState('加载失败，请刷新重试');
+                console.error('获取商品数据失败:', error);
             }
-        });
+        }
 
-        function updateProductDetails() {
+        // 显示商品
+        function displayProducts() {
             const container = document.getElementById('product-container');
-            const cards = container.getElementsByClassName('product-card');
-            Array.from(cards).forEach((card) => {
-                const description = card.querySelector('.description');
-                description.textContent = description.textContent.length > 50 ? description.textContent.slice(0, 50) + '...' : description.textContent;
+            container.innerHTML = '';
+
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                
+                productCard.innerHTML = `
+                    <div class="product-image-container">
+                        <img src="commodity/temp.jpg" 
+                             data-src="/commodity/${product.merchants_id}/${product.Id}/main.jpg" 
+                             alt="${product.commodity_title}">
+                    </div>
+                    <div class="product-title">${product.commodity_title}</div>
+                    <div class="product-description">${product.commodity_info || '暂无描述'}</div>
+                    <div class="product-footer">
+                        <div class="product-price">
+                            <span class="price-symbol">¥</span>${parseFloat(product.price).toFixed(2)}
+                        </div>
+                        <div class="product-cart-icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                `;
+                
+                productCard.onclick = () => {
+                    location.href = `commodity.html?id=${product.Id}`;
+                };
+                
+                container.appendChild(productCard);
+
+                // 懒加载图片
+                const img = productCard.querySelector('img');
+                imgObserver.observe(img);
             });
         }
 
+        // 显示空状态
+        function showEmptyState(message) {
+            const container = document.getElementById('product-container');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-box-open empty-icon"></i>
+                    <div class="empty-text">${message}</div>
+                </div>
+            `;
+        }
+
+        // 获取商家名称
         function getMerchantName(merchants_id) {
             return fetch(`./php/getMerchantName.php?id=${merchants_id}`)
                 .then(response => response.json())
@@ -203,19 +506,50 @@
                 .catch(() => ({ id: merchants_id, name: "未知商家" }));
         }
 
+        // 图片懒加载观察器
         const imgObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.onload = () => img.style.opacity = 1;
+                    const src = img.dataset.src;
+                    
+                    img.src = src;
+                    img.onload = () => {
+                        img.classList.add('loaded');
+                    };
+                    img.onerror = () => {
+                        img.src = 'commodity/temp.jpg';
+                        img.classList.add('loaded');
+                    };
+                    
                     imgObserver.unobserve(img);
                 }
             });
         });
 
+        // 搜索功能
+        document.getElementById('search-button').addEventListener('click', performSearch);
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        function performSearch() {
+            const searchTerm = document.getElementById('search-input').value.trim();
+            if (searchTerm) {
+                location.href = `search.html?info=${encodeURIComponent(searchTerm)}`;
+            }
+        }
+
+        // 页面加载时获取商品
+        window.addEventListener('load', loadProducts);
+
+        // 禁用右键和多点触控
         document.oncontextmenu = () => false;
-        document.addEventListener('touchstart', (event) => { if (event.touches.length > 1) event.preventDefault(); });
+        document.addEventListener('touchstart', (event) => { 
+            if (event.touches.length > 1) event.preventDefault(); 
+        });
     </script>
 </body>
 </html>

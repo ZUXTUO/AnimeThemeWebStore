@@ -3,129 +3,504 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理员登录</title>
+    <title>管理员后台</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #2e2e2e;
-            color: #f0f0f0;
+        * {
             margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #7b68ee;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --dark-bg: #1a1a2e;
+            --card-bg: #16213e;
+            --sidebar-bg: #0f1419;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c1ec;
+            --border-color: #2d3748;
+            --hover-bg: #2d3748;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0f3460 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        /* 侧边栏样式 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 260px;
+            background: var(--sidebar-bg);
             padding: 20px;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-header {
             display: flex;
-            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 32px;
+            color: var(--primary-color);
+        }
+
+        .sidebar-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--hover-bg);
+            color: var(--text-primary);
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            font-size: 18px;
+            width: 20px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        /* 顶部栏 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 登录卡片 */
+        .login-container {
+            display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            padding: 20px;
         }
-        #loginFormContainer {
-            background-color: #3b3b3b;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
-            max-width: 400px;
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
             width: 100%;
+            max-width: 450px;
+            border: 1px solid var(--border-color);
         }
-        h1 {
+
+        .login-header {
             text-align: center;
-            color: #ffffff;
+            margin-bottom: 35px;
+        }
+
+        .login-header i {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .login-header h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--dark-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--dark-bg);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--hover-bg);
+            border-color: var(--primary-color);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        /* 商家列表卡片 */
+        .merchants-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .merchant-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .merchant-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .merchant-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .merchant-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 3px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .merchant-avatar:hover {
+            border-color: var(--primary-color);
+            transform: scale(1.05);
+        }
+
+        .merchant-info h3 {
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+
+        .merchant-id {
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .merchant-fields {
             margin-bottom: 20px;
         }
-        label {
+
+        .field-group {
+            margin-bottom: 16px;
+        }
+
+        .field-label {
             display: block;
-            margin: 10px 0 5px;
-            color: #cccccc;
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-bottom: 6px;
+            font-weight: 500;
         }
-        input[type="text"],
-        input[type="password"] {
-            width: calc(100% - 22px);
-            padding: 10px;
-            border: 1px solid #555;
-            border-radius: 4px;
-            background-color: #444;
-            color: #ffffff;
-            font-size: 16px;
-            transition: border-color 0.3s;
+
+        .payment-codes {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
         }
-        input[type="text"]:focus,
-        input[type="password"]:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-        button {
-            background-color: #007bff;
-            color: #ffffff;
-            border: none;
-            border-radius: 4px;
-            padding: 10px;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 15px;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #0056b3;
-        }
-        #merchantList {
-            margin-top: 20px;
-            display: none;
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .merchant-row {
-            background-color: #444;
-            border-bottom: 1px solid #555;
-            transition: background-color 0.2s;
-        }
-        .merchant-row:hover {
-            background-color: #555;
-        }
-        .merchant-cell {
-            padding: 15px;
-            color: #ffffff;
+
+        .payment-code {
+            flex: 1;
             text-align: center;
         }
-        .merchant-img {
+
+        .payment-code img {
             width: 100%;
-            height: auto;
-            max-width: 100px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
             cursor: pointer;
+            transition: all 0.3s ease;
         }
+
+        .payment-code img:hover {
+            border-color: var(--success-color);
+            transform: scale(1.05);
+        }
+
+        .payment-label {
+            display: block;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .merchant-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* 模态框样式 */
         .modal {
             display: none;
             position: fixed;
-            z-index: 1;
+            z-index: 2000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
         }
+
         .modal-content {
-            background-color: #3b3b3b;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 300px;
-            border-radius: 8px;
+            position: relative;
+            background: var(--card-bg);
+            margin: 5% auto;
+            padding: 0;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlideIn 0.3s ease;
         }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+        }
+
         .close {
-            color: #aaa;
-            float: right;
+            color: var(--text-secondary);
             font-size: 28px;
             font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: #fff;
-            text-decoration: none;
             cursor: pointer;
+            transition: all 0.3s ease;
         }
-        #addMerchantBtn {
-            margin-top: auto;
+
+        .close:hover {
+            color: var(--danger-color);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .merchants-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                gap: 16px;
+            }
+
+            .top-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 0.8s ease infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden {
             display: none;
-            padding: 10px 20px;
         }
     </style>
     <script>
@@ -143,10 +518,9 @@
                 localStorage.setItem('adminId', formData.get('id'));
                 localStorage.setItem('adminPassword', formData.get('password'));
 
+                document.getElementById('loginContainer').classList.add('hidden');
+                document.getElementById('mainContent').classList.remove('hidden');
                 displayMerchants(result.merchants);
-                document.getElementById('addMerchantBtn').style.display = 'block';
-                document.getElementById('goToMerchantBtn').style.display = 'block';
-                document.getElementById('goToUserBtn').style.display = 'block';
             } else {
                 alert(result.message);
             }
@@ -168,55 +542,84 @@
                 const result = await response.json();
 
                 if (result.success) {
+                    document.getElementById('loginContainer').classList.add('hidden');
+                    document.getElementById('mainContent').classList.remove('hidden');
                     displayMerchants(result.merchants);
-                    document.getElementById('addMerchantBtn').style.display = 'block';
-                    document.getElementById('goToMerchantBtn').style.display = 'block';
-                    document.getElementById('goToUserBtn').style.display = 'block';
-                } else {
-                    alert(result.message);
                 }
             }
         }
 
         function displayMerchants(merchants) {
-            const loginForm = document.getElementById('loginFormContainer');
-            const merchantList = document.getElementById('merchantList');
-            const tbody = merchantList.querySelector('tbody');
-            tbody.innerHTML = '';
-            loginForm.style.display = 'none';
-            merchantList.style.display = 'table';
+            const merchantsGrid = document.getElementById('merchantsGrid');
+            merchantsGrid.innerHTML = '';
+
+            if (merchants.length === 0) {
+                merchantsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-store-slash"></i>
+                        <h3>暂无商家</h3>
+                        <p>点击添加商家按钮创建第一个商家</p>
+                    </div>
+                `;
+                return;
+            }
 
             merchants.forEach(merchant => {
-                const row = document.createElement('tr');
-                row.classList.add('merchant-row');
-
                 const avatarSrc = `../commodity/${merchant.Id}/icon.jpg`;
                 const wechatSrc = `../commodity/${merchant.Id}/wx.jpg`;
                 const alipaySrc = `../commodity/${merchant.Id}/zfb.jpg`;
                 const defaultImg = '../commodity/temp.jpg';
 
-                row.innerHTML = `
-                    <td class="merchant-cell">
-                        <img src="${avatarSrc}" onerror="this.src='${defaultImg}'" class="merchant-img" alt="头像" onclick="handleImageClick('icon', ${merchant.Id})">
-                    </td>
-                    <td class="merchant-cell">
-                        <input type="text" value="${merchant.name}" data-id="${merchant.Id}" class="merchant-name" placeholder="商家名称" />
-                    </td>
-                    <td class="merchant-cell">
-                        <input type="text" value="${merchant.password}" data-id="${merchant.Id}" class="merchant-password" placeholder="商家密码" />
-                    </td>
-                    <td class="merchant-cell">
-                        <img src="${wechatSrc}" onerror="this.src='${defaultImg}'" alt="微信二维码" class="merchant-img" onclick="handleImageClick('wx', ${merchant.Id})">
-                    </td>
-                    <td class="merchant-cell">
-                        <img src="${alipaySrc}" onerror="this.src='${defaultImg}'" alt="支付宝二维码" class="merchant-img" onclick="handleImageClick('zfb', ${merchant.Id})">
-                    </td>
-                    <td class="merchant-cell">
-                        <button class="merchant-save-btn" onclick="updateMerchant(${merchant.Id})">保存</button>
-                    </td>
+                const card = document.createElement('div');
+                card.classList.add('merchant-card');
+                card.innerHTML = `
+                    <div class="merchant-header">
+                        <img src="${avatarSrc}" onerror="this.src='${defaultImg}'" 
+                             class="merchant-avatar" 
+                             onclick="handleImageClick('icon', ${merchant.Id})"
+                             title="点击更换头像">
+                        <div class="merchant-info">
+                            <h3>${merchant.name}</h3>
+                            <span class="merchant-id">ID: ${merchant.Id}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="merchant-fields">
+                        <div class="field-group">
+                            <label class="field-label">商家名称</label>
+                            <input type="text" class="form-input" value="${merchant.name}" 
+                                   data-id="${merchant.Id}" data-field="name">
+                        </div>
+                        <div class="field-group">
+                            <label class="field-label">商家密码</label>
+                            <input type="text" class="form-input" value="${merchant.password}" 
+                                   data-id="${merchant.Id}" data-field="password">
+                        </div>
+                    </div>
+
+                    <div class="payment-codes">
+                        <div class="payment-code">
+                            <img src="${wechatSrc}" onerror="this.src='${defaultImg}'" 
+                                 onclick="handleImageClick('wx', ${merchant.Id})"
+                                 title="点击更换微信收款码">
+                            <span class="payment-label"><i class="fab fa-weixin"></i> 微信</span>
+                        </div>
+                        <div class="payment-code">
+                            <img src="${alipaySrc}" onerror="this.src='${defaultImg}'" 
+                                 onclick="handleImageClick('zfb', ${merchant.Id})"
+                                 title="点击更换支付宝收款码">
+                            <span class="payment-label"><i class="fab fa-alipay"></i> 支付宝</span>
+                        </div>
+                    </div>
+
+                    <div class="merchant-actions">
+                        <button class="btn btn-success btn-sm" onclick="updateMerchant(${merchant.Id})" style="flex: 1;">
+                            <i class="fas fa-save"></i> 保存
+                        </button>
+                    </div>
                 `;
 
-                tbody.appendChild(row);
+                merchantsGrid.appendChild(card);
             });
         }
 
@@ -239,7 +642,8 @@
                     const result = await response.json();
 
                     if (result.success) {
-                        alert('图片上传成功，请刷新网页查看！');
+                        alert('图片上传成功！');
+                        autoLogin();
                     } else {
                         alert(result.message);
                     }
@@ -249,8 +653,8 @@
         }
 
         async function updateMerchant(id) {
-            const nameInput = document.querySelector(`input.merchant-name[data-id="${id}"]`);
-            const passwordInput = document.querySelector(`input.merchant-password[data-id="${id}"]`);
+            const nameInput = document.querySelector(`input[data-id="${id}"][data-field="name"]`);
+            const passwordInput = document.querySelector(`input[data-id="${id}"][data-field="password"]`);
 
             const updatedData = {
                 id: id,
@@ -268,7 +672,8 @@
             const result = await response.json();
 
             if (result.success) {
-                alert('更新成功');
+                alert('更新成功！');
+                autoLogin();
             } else {
                 alert(result.message);
             }
@@ -293,61 +698,138 @@
             const result = await response.json();
 
             if (result.success) {
-                alert('商家添加成功');
+                alert('商家添加成功！');
                 closeModal();
+                document.getElementById('newMerchantForm').reset();
                 await autoLogin();
             } else {
                 alert(result.message);
             }
         }
 
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('adminId');
+                localStorage.removeItem('adminPassword');
+                document.getElementById('loginContainer').classList.remove('hidden');
+                document.getElementById('mainContent').classList.add('hidden');
+            }
+        }
+
         window.onload = autoLogin;
+        window.onclick = function(event) {
+            const modal = document.getElementById('merchantModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
     </script>
 </head>
 <body>
-    <div id="loginFormContainer">
-        <h1>管理员登录</h1>
-        <form id="loginForm" onsubmit="login(event)">
-            <label for="id">ID:</label>
-            <input type="text" id="id" name="id" required>
-            <br>
-            <label for="password">密码:</label>
-            <input type="text" id="password" name="password" required>
-            <br>
-            <button type="submit">登录</button>
-            <button type="button" onclick="window.location.href='Merchants/index.html'">跳转到商户端</button>
-        </form>
+    <!-- 登录界面 -->
+    <div id="loginContainer" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-user-shield"></i>
+                <h1>管理员登录</h1>
+                <p>请输入您的管理员凭证</p>
+            </div>
+            <form id="loginForm" onsubmit="login(event)">
+                <div class="form-group">
+                    <label for="id"><i class="fas fa-id-card"></i> 管理员ID</label>
+                    <input type="text" id="id" name="id" class="form-input" placeholder="请输入管理员ID" required>
+                </div>
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> 密码</label>
+                    <input type="password" id="password" name="password" class="form-input" placeholder="请输入密码" required>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> 登录
+                </button>
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='Merchants/index.html'" style="margin-top: 12px; width: 100%; justify-content: center;">
+                    <i class="fas fa-store"></i> 商户端入口
+                </button>
+            </form>
+        </div>
     </div>
 
-    <table id="merchantList">
-        <thead>
-            <tr>
-                <th class="merchant-cell">头像</th>
-                <th class="merchant-cell">商家名称</th>
-                <th class="merchant-cell">商家密码</th>
-                <th class="merchant-cell">微信收款码</th>
-                <th class="merchant-cell">支付宝收款码</th>
-                <th class="merchant-cell">操作</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+    <!-- 主内容区域 -->
+    <div id="mainContent" class="hidden">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-crown"></i>
+                <h2>管理后台</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active">
+                        <i class="fas fa-store"></i>
+                        <span>商家管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="admin_user.html" class="nav-link">
+                        <i class="fas fa-users"></i>
+                        <span>用户管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="Merchants/index.html" class="nav-link">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>商户端</span>
+                    </a>
+                </li>
+                <li class="nav-item" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                    <a href="#" class="nav-link" onclick="logout(); return false;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>退出登录</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
 
-    <button id="addMerchantBtn" style="display:none;" onclick="openModal()">添加商家</button>
-    <button id="goToMerchantBtn" style="display:none;" onclick="window.location.href='Merchants/index.html'">转到商户端</button>
-    <button id="goToUserBtn" style="display:none;" onclick="window.location.href='admin_user.html'">修改用户信息</button>
+        <!-- 主内容 -->
+        <main class="main-content">
+            <div class="top-bar">
+                <h1 class="page-title">
+                    <i class="fas fa-store"></i> 商家管理
+                </h1>
+                <div class="top-actions">
+                    <button class="btn btn-success" onclick="openModal()">
+                        <i class="fas fa-plus"></i> 添加商家
+                    </button>
+                </div>
+            </div>
 
+            <div id="merchantsGrid" class="merchants-grid">
+                <!-- 商家列表将在这里动态生成 -->
+            </div>
+        </main>
+    </div>
+
+    <!-- 添加商家模态框 -->
     <div id="merchantModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h2>添加商家</h2>
-            <form id="newMerchantForm" onsubmit="addMerchant(event)">
-                <label for="newMerchantName">商家名称:</label>
-                <input type="text" id="newMerchantName" name="name" required>
-                <label for="newMerchantPassword">商家密码:</label>
-                <input type="text" id="newMerchantPassword" name="password" required>
-                <button type="submit">添加</button>
-            </form>
+            <div class="modal-header">
+                <h2><i class="fas fa-plus-circle"></i> 添加新商家</h2>
+                <span class="close" onclick="closeModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="newMerchantForm" onsubmit="addMerchant(event)">
+                    <div class="form-group">
+                        <label for="newMerchantName"><i class="fas fa-signature"></i> 商家名称</label>
+                        <input type="text" id="newMerchantName" name="name" class="form-input" placeholder="请输入商家名称" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newMerchantPassword"><i class="fas fa-key"></i> 商家密码</label>
+                        <input type="text" id="newMerchantPassword" name="password" class="form-input" placeholder="请设置商家密码" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> 添加商家
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </body>

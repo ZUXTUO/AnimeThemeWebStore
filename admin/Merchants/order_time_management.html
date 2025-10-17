@@ -1,71 +1,368 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>自动任务执行工具</title>
+    <title>自动订单管理 - 商户端</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #7b68ee;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --dark-bg: #1a1a2e;
+            --card-bg: #16213e;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c1ec;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
         body {
-            background-color: #121212;
-            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0f3460 100%);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            font-family: 'Arial', sans-serif;
-            margin: 0;
-            transition: background-color 0.3s;
+            min-height: 100vh;
+            overflow: hidden;
         }
-        #message {
-            font-size: 24px;
-            margin-bottom: 20px;
-            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.7);
+
+        .container {
+            text-align: center;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            max-width: 600px;
+            width: 90%;
+            border: 2px solid rgba(74, 144, 226, 0.3);
         }
-        #countdown {
+
+        .icon-wrapper {
             font-size: 80px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #d6ff40;
-            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.7);
+            margin-bottom: 30px;
+            animation: pulse 2s ease-in-out infinite;
         }
-        #output {
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 40px;
+        }
+
+        .warning-message {
+            background: rgba(255, 193, 7, 0.1);
+            border: 2px solid rgba(255, 193, 7, 0.3);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--warning-color);
+        }
+
+        .warning-message i {
             font-size: 24px;
-            margin-top: 20px;
-            text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.7);
-            transition: color 0.3s;
+        }
+
+        .countdown-wrapper {
+            margin: 40px 0;
+        }
+
+        .countdown-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .countdown {
+            font-size: 100px;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--success-color), var(--info-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(40, 167, 69, 0.3);
+            line-height: 1;
+            margin-bottom: 12px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .countdown-unit {
+            font-size: 18px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-color), var(--info-color));
+            border-radius: 10px;
+            transition: width 1s linear;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+        }
+
+        .status-message {
+            font-size: 18px;
+            color: var(--text-primary);
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .status-message.success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 2px solid rgba(40, 167, 69, 0.3);
+            color: var(--success-color);
+        }
+
+        .status-message.error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 2px solid rgba(220, 53, 69, 0.3);
+            color: var(--danger-color);
+        }
+
+        .info-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-top: 30px;
+        }
+
+        .info-card {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .info-card-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .info-card-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .info-card-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .title {
+                font-size: 24px;
+            }
+
+            .countdown {
+                font-size: 72px;
+            }
+
+            .info-cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .container {
+            animation: fadeIn 0.5s ease;
         }
     </style>
 </head>
 <body>
-    <div id="message">此页面最好不要关闭</div>
-    <div id="countdown">60</div>
-    <div id="output"></div>
+    <div class="container">
+        <div class="icon-wrapper">
+            <i class="fas fa-robot"></i>
+        </div>
+
+        <h1 class="title">自动订单管理系统</h1>
+        <p class="subtitle">系统将自动检测并处理超时订单</p>
+
+        <div class="warning-message">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>请保持此页面在后台运行，不要关闭此窗口</span>
+        </div>
+
+        <div class="countdown-wrapper">
+            <div class="countdown-label">下次检查倒计时</div>
+            <div class="countdown" id="countdown">60</div>
+            <div class="countdown-unit">秒</div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <div class="status-message" id="output">
+            <i class="fas fa-hourglass-half spinner"></i>
+            <span>等待首次检查...</span>
+        </div>
+
+        <div class="info-cards">
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <i class="fas fa-clock" style="color: var(--primary-color);"></i>
+                </div>
+                <div class="info-card-label">检查间隔</div>
+                <div class="info-card-value">60 秒</div>
+            </div>
+            <div class="info-card">
+                <div class="info-card-icon">
+                    <i class="fas fa-check-circle" style="color: var(--success-color);"></i>
+                </div>
+                <div class="info-card-label">已完成检查</div>
+                <div class="info-card-value" id="checkCount">0 次</div>
+            </div>
+        </div>
+    </div>
 
     <script>
         let timeLeft = 60;
+        let checkCount = 0;
         const countdownElement = document.getElementById('countdown');
         const outputElement = document.getElementById('output');
+        const progressBar = document.getElementById('progressBar');
+        const checkCountElement = document.getElementById('checkCount');
         
         function updateCountdown() {
             if (timeLeft <= 0) {
+                // 执行检查
+                outputElement.innerHTML = '<i class="fas fa-sync spinner"></i><span>正在检查订单...</span>';
+                outputElement.classList.remove('success', 'error');
+                
                 fetch('../../php/admin/checkOrder.php')
                     .then(response => response.json())
                     .then(data => {
-                        outputElement.textContent = `自动处理了${data.success ? data.message : '错误'}笔订单`;
+                        checkCount++;
+                        checkCountElement.textContent = `${checkCount} 次`;
+                        
+                        if (data.success) {
+                            outputElement.innerHTML = `
+                                <i class="fas fa-check-circle"></i>
+                                <span>${data.message}</span>
+                            `;
+                            outputElement.classList.add('success');
+                        } else {
+                            outputElement.innerHTML = `
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>检查失败: ${data.message || '未知错误'}</span>
+                            `;
+                            outputElement.classList.add('error');
+                        }
+                        
                         timeLeft = 60;
                     })
                     .catch(error => {
                         console.error('Error:', error);
-                        outputElement.textContent = '请求失败';
+                        outputElement.innerHTML = `
+                            <i class="fas fa-times-circle"></i>
+                            <span>请求失败，请检查网络连接</span>
+                        `;
+                        outputElement.classList.add('error');
+                        timeLeft = 60;
                     });
             } else {
                 countdownElement.textContent = timeLeft;
+                const progress = ((60 - timeLeft) / 60) * 100;
+                progressBar.style.width = progress + '%';
                 timeLeft--;
             }
         }
 
+        // 初始化进度条
+        progressBar.style.width = '0%';
+
+        // 每秒更新一次
         setInterval(updateCountdown, 1000);
+
+        // 防止意外关闭
+        window.addEventListener('beforeunload', function (e) {
+            e.preventDefault();
+            e.returnValue = '关闭此页面将停止自动订单管理，确定要关闭吗？';
+        });
     </script>
 </body>
 </html>

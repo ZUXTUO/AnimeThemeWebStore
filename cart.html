@@ -3,211 +3,949 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>购物车</title>
+    <title>购物车 - 我的商城</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #7b68ee;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --dark-bg: #1a1a2e;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-color: #e0e6ed;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
         body {
             margin: 0;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('img/bg.jpg');
             background-size: cover;
             background-position: center;
-            height: 100vh;
+            background-attachment: fixed;
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
             padding: 15px;
-            box-sizing: border-box;
+            padding-bottom: 90px;
         }
-        .cart-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin: 20px auto;
-            max-width: 90%;
-            max-height: calc(100vh - 220px);
-            overflow-y: auto;
-        }
-        .header {
+
+        /* 页面头部 */
+        .page-header {
             text-align: center;
-            font-size: 2em;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            animation: fadeInDown 0.6s ease;
         }
-        .empty-cart-message {
-            font-size: 2em;
+
+        .page-title {
+            font-size: 2.5em;
+            font-weight: 700;
             color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-            text-align: center;
-            margin: 20px 0;
-            display: none; /* 默认隐藏 */
-        }
-        .cart-item {
-            background-color: white;
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 10px;
+            text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            width: 100%;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 8px;
         }
-        .cart-item img {
-            width: 100px;
-            height: 100px;
-            border-radius: 5px;
-            margin-right: 15px;
-            border: 2px solid #ccc;
-            cursor: pointer;
-        }
-        .item-details {
-            flex-grow: 1;
-            margin-right: 15px;
-        }
-        .item-title {
+
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.9);
             font-size: 1em;
-            font-weight: bold;
-            cursor: pointer;
-            color: black;
-            margin: 5px 0;
+            text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
         }
-        .item-quantity {
-            font-size: 0.8em;
-            color: rgb(118, 0, 45);
-            font-weight: bold;
+
+        /* 统计卡片 - 强制横向排列，自动适配宽度 */
+        .stats-container {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: center;
+            align-items: stretch;
+            gap: 12px;
+            margin-bottom: 16px;
+            animation: fadeInUp 0.6s ease 0.2s both;
+            flex-wrap: nowrap !important;
+            width: 100%;
+            max-width: 900px;
+            margin-left: auto;
+            margin-right: auto;
         }
-        .item-price {
-            font-size: 0.9em;
-            color: rgb(174, 0, 0);
-            font-weight: bold;
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 14px 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            display: inline-flex !important;
+            flex-direction: row !important;
+            align-items: center;
+            gap: 12px;
+            flex: 1 1 0 !important;
+            white-space: nowrap;
+            min-width: 0;
         }
-        .remove-button, .buy-button {
-            background-color: red;
-            color: white;
-            padding: 8px 12px;
-            border: none;
-            border-radius: 15px;
-            font-weight: bold;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-            cursor: pointer;
-            transition: background-color 0.3s;
-            margin-left: 10px;
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
         }
-        .remove-button:hover, .buy-button:hover {
-            background-color: darkred;
+
+        .stat-icon {
+            font-size: 32px;
+            flex-shrink: 0;
         }
-        #footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
+
+        .stat-info {
             display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.2);
-        }
-        .footer-button {
-            padding: 12px;
-            cursor: pointer;
-            text-align: center;
+            flex-direction: column;
+            align-items: flex-start;
             flex: 1;
-            border-radius: 10px;
-            transition: background-color 0.3s;
+            min-width: 0;
         }
-        .footer-button:hover {
-            background-color: rgba(0, 0, 0, 0.1);
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.2;
         }
-        .notification {
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            letter-spacing: 0.3px;
+        }
+
+        /* 购物车容器 */
+        .cart-container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            animation: fadeInUp 0.6s ease 0.4s both;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
             display: none;
-            position: fixed;
-            bottom: 60px;
-            left: 50%;
-            transform: translateX(-50%);
-            background-color: red;
+        }
+
+        .empty-icon {
+            font-size: 100px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .empty-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .empty-description {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .empty-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .empty-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(74, 144, 226, 0.4);
+        }
+
+        /* 购物车项目 */
+        .cart-items {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .cart-item {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
+            gap: 20px;
+            align-items: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            animation: slideInLeft 0.4s ease;
+        }
+
+        .cart-item:hover {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 20px rgba(74, 144, 226, 0.2);
+            transform: translateX(4px);
+        }
+
+        /* 商品图片 */
+        .item-image-wrapper {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            aspect-ratio: 1;
+            cursor: pointer;
+        }
+
+        .item-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .item-image-wrapper:hover .item-image {
+            transform: scale(1.1);
+        }
+
+        .image-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .item-image-wrapper:hover .image-overlay {
+            opacity: 1;
+        }
+
+        .image-overlay i {
+            color: white;
+            font-size: 32px;
+        }
+
+        /* 商品详情 */
+        .item-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .item-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: color 0.3s ease;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .item-title:hover {
+            color: var(--primary-color);
+        }
+
+        .item-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .meta-item i {
+            color: var(--primary-color);
+        }
+
+        .item-price-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .unit-price {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .total-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--danger-color);
+        }
+
+        .price-symbol {
+            font-size: 16px;
+        }
+
+        /* 操作按钮区域 */
+        .item-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            min-width: 100px;
+        }
+
+        .btn {
             padding: 10px 20px;
-            border-radius: 5px;
-            z-index: 1000;
-            transition: opacity 0.5s;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        .btn-danger {
+            background: white;
+            color: var(--danger-color);
+            border: 2px solid var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        /* 购物车底部 */
+        .cart-footer {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .cart-summary {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .summary-label {
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .grand-total {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--danger-color);
+        }
+
+        .checkout-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-large {
+            padding: 16px 40px;
+            font-size: 18px;
+        }
+
+        /* 通知消息 */
+        .notification {
+            position: fixed;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: white;
+            color: var(--text-primary);
+            padding: 16px 32px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-width: 300px;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            border-left: 4px solid var(--success-color);
+        }
+
+        .notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .notification i {
+            font-size: 24px;
+            color: var(--success-color);
+        }
+
+        .notification.error {
+            border-left-color: var(--danger-color);
+        }
+
+        .notification.error i {
+            color: var(--danger-color);
+        }
+
+        /* 动画 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                padding-bottom: 85px;
+            }
+
+            .page-title {
+                font-size: 1.8em;
+            }
+
+            .page-subtitle {
+                font-size: 0.9em;
+            }
+
+            .stats-container {
+                gap: 6px;
+                margin-bottom: 12px;
+            }
+
+            .stat-card {
+                padding: 5px 10px;
+                gap: 6px;
+            }
+
+            .stat-icon {
+                font-size: 18px;
+            }
+
+            .stat-value {
+                font-size: 14px;
+            }
+
+            .stat-label {
+                font-size: 9px;
+            }
+
+            .cart-container {
+                padding: 16px;
+                border-radius: 16px;
+            }
+
+            .cart-item {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                padding: 16px;
+            }
+
+            .item-image-wrapper {
+                width: 100%;
+                max-width: 200px;
+                margin: 0 auto;
+            }
+
+            .item-details {
+                text-align: center;
+            }
+
+            .item-title {
+                font-size: 16px;
+            }
+
+            .item-meta {
+                justify-content: center;
+                gap: 12px;
+            }
+
+            .meta-item {
+                font-size: 13px;
+            }
+
+            .item-price-info {
+                text-align: center;
+            }
+
+            .total-price {
+                font-size: 22px;
+            }
+
+            .item-actions {
+                flex-direction: row;
+                justify-content: center;
+                width: 100%;
+            }
+
+            .btn {
+                flex: 1;
+                font-size: 13px;
+                padding: 10px 16px;
+            }
+
+            .cart-footer {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 16px;
+                padding-top: 20px;
+            }
+
+            .cart-summary {
+                text-align: center;
+            }
+
+            .summary-row {
+                justify-content: center;
+                gap: 16px;
+            }
+
+            .summary-label {
+                font-size: 14px;
+            }
+
+            .summary-value {
+                font-size: 16px;
+            }
+
+            .grand-total {
+                font-size: 26px;
+            }
+
+            .checkout-actions {
+                flex-direction: column;
+            }
+
+            .btn-large {
+                width: 100%;
+                padding: 14px 32px;
+                font-size: 16px;
+            }
+
+            .empty-icon {
+                font-size: 80px;
+            }
+
+            .empty-title {
+                font-size: 20px;
+            }
+
+            .empty-description {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 1.5em;
+            }
+
+            .stat-card {
+                padding: 4px 8px;
+                gap: 5px;
+            }
+
+            .stat-icon {
+                font-size: 16px;
+            }
+
+            .stat-value {
+                font-size: 13px;
+            }
+
+            .stat-label {
+                font-size: 8px;
+            }
+
+            .cart-container {
+                padding: 12px;
+            }
+
+            .cart-item {
+                padding: 12px;
+            }
+
+            .item-title {
+                font-size: 14px;
+            }
+
+            .meta-item {
+                font-size: 12px;
+            }
+
+            .total-price {
+                font-size: 20px;
+            }
+
+            .btn {
+                font-size: 12px;
+                padding: 8px 12px;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid var(--border-color);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
+</head>
+<body>
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-shopping-cart"></i>
+            我的购物车
+        </h1>
+        <p class="page-subtitle">Shopping Cart</p>
+    </div>
+
+    <!-- 统计卡片 -->
+    <div class="stats-container" id="statsContainer" style="display: none;">
+        <div class="stat-card">
+            <div class="stat-icon">🛒</div>
+            <div class="stat-info">
+                <div class="stat-value" id="itemCount">0</div>
+                <div class="stat-label">商品种类</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-info">
+                <div class="stat-value" id="totalQuantity">0</div>
+                <div class="stat-label">总数量</div>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">💰</div>
+            <div class="stat-info">
+                <div class="stat-value">¥<span id="totalAmount">0</span></div>
+                <div class="stat-label">总金额</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 购物车容器 -->
+    <div class="cart-container">
+        <!-- 空状态 -->
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <h2 class="empty-title">购物车是空的</h2>
+            <p class="empty-description">还没有添加任何商品，去逛逛吧！</p>
+            <a href="index.html" class="empty-action">
+                <i class="fas fa-store"></i>
+                去购物
+            </a>
+        </div>
+
+        <!-- 加载状态 -->
+        <div class="loading" id="loadingState">
+            <div class="loading-spinner"></div>
+            <p style="margin-top: 16px; color: var(--text-secondary);">加载中...</p>
+        </div>
+
+        <!-- 购物车项目 -->
+        <div class="cart-items" id="cartItems" style="display: none;">
+            <!-- 商品项将在这里动态生成 -->
+        </div>
+
+        <!-- 购物车底部 -->
+        <div class="cart-footer" id="cartFooter" style="display: none;">
+            <div class="cart-summary">
+                <div class="summary-row">
+                    <span class="summary-label">商品总额：</span>
+                    <span class="summary-value">¥<span id="subtotal">0</span></span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">应付总额：</span>
+                    <span class="grand-total">¥<span id="grandTotal">0</span></span>
+                </div>
+            </div>
+            <div class="checkout-actions">
+                <button class="btn btn-danger btn-large" onclick="clearCart()">
+                    <i class="fas fa-trash-alt"></i>
+                    清空购物车
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部导航栏通过 footer.js 自动加载 -->
+    <script src="footer.js"></script>
+
     <script>
         let userId;
+        let cartData = [];
 
+        // 获取用户信息并加载购物车
         fetch('./php/getUser.php')
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert(data.error);
+                    alert('请先登录');
                     window.location.href = 'login.html';
                 } else {
                     userId = data.id;
                     loadCart(userId);
                 }
             })
-            .catch(error => console.error('检查登录状态失败:', error));
+            .catch(error => {
+                console.error('检查登录状态失败:', error);
+                showNotification('加载失败，请刷新页面', 'error');
+            });
 
+        // 加载购物车
         function loadCart(userId) {
+            const loadingState = document.getElementById('loadingState');
+            const emptyState = document.getElementById('emptyState');
+            const cartItems = document.getElementById('cartItems');
+            const cartFooter = document.getElementById('cartFooter');
+            const statsContainer = document.getElementById('statsContainer');
+
             fetch(`./php/cart/getCartInfo.php?user_id=${userId}`)
                 .then(response => response.json())
-                .then(cartItems => {
-                    const cartContainer = document.getElementById('cart-container');
-                    const emptyMessage = document.querySelector('.empty-cart-message');
-                    cartContainer.innerHTML = '';
+                .then(items => {
+                    cartData = items;
+                    loadingState.style.display = 'none';
 
-                    if (cartItems.length === 0) {
-                        cartContainer.style.display = 'none'; // 隐藏购物车框
-                        emptyMessage.style.display = 'block'; // 显示空购物车信息
+                    if (items.length === 0) {
+                        emptyState.style.display = 'block';
+                        cartItems.style.display = 'none';
+                        cartFooter.style.display = 'none';
+                        statsContainer.style.display = 'none';
                     } else {
-                        cartContainer.style.display = 'flex'; // 显示购物车框
-                        emptyMessage.style.display = 'none'; // 隐藏空购物车信息
-                        cartItems.forEach(item => {
-                            const cartItemDiv = document.createElement('div');
-                            cartItemDiv.className = 'cart-item';
-
-                            const img = document.createElement('img');
-                            img.src = `/commodity/${item.merchants_id}/${item.commodity_id}/main.jpg`;
-                            img.onclick = () => location.href = `commodity.html?id=${item.commodity_id}`;
-
-                            const detailsDiv = document.createElement('div');
-                            detailsDiv.className = 'item-details';
-                            detailsDiv.innerHTML = `
-                                <div class="item-title" onclick="location.href='commodity.html?id=${item.commodity_id}'">${item.commodity_title}</div>
-                                <div class="item-quantity">数量: ${item.num}</div>
-                                <div class="item-price">价格: <br>${item.price}元 x ${item.num} = ${item.price * item.num}元</div>
-                            `;
-
-                            const buyButton = document.createElement('button');
-                            buyButton.className = 'buy-button';
-                            buyButton.innerText = '购买';
-                            buyButton.onclick = () => buyNow(item.commodity_id, item.merchants_id, item.num);
-
-                            const removeButton = document.createElement('button');
-                            removeButton.className = 'remove-button';
-                            removeButton.innerText = '删除';
-                            removeButton.onclick = () => removeFromCart(item.commodity_id);
-
-                            cartItemDiv.appendChild(img);
-                            cartItemDiv.appendChild(detailsDiv);
-                            cartItemDiv.appendChild(buyButton); // 添加购买按钮
-                            cartItemDiv.appendChild(removeButton);
-                            cartContainer.appendChild(cartItemDiv);
-                        });
+                        emptyState.style.display = 'none';
+                        cartItems.style.display = 'flex';
+                        cartFooter.style.display = 'flex';
+                        statsContainer.style.display = 'grid';
+                        
+                        renderCartItems(items);
+                        updateStats(items);
+                        
+                        // 更新底部导航的购物车徽章
+                        if (window.updateCartCount) {
+                            window.updateCartCount(items.length);
+                        }
                     }
                 })
-                .catch(error => console.error('加载购物车失败:', error));
+                .catch(error => {
+                    console.error('加载购物车失败:', error);
+                    loadingState.style.display = 'none';
+                    showNotification('加载购物车失败', 'error');
+                });
         }
 
+        // 渲染购物车项目
+        function renderCartItems(items) {
+            const container = document.getElementById('cartItems');
+            container.innerHTML = '';
+
+            items.forEach((item, index) => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'cart-item';
+                itemDiv.style.animationDelay = `${index * 0.1}s`;
+                
+                itemDiv.innerHTML = `
+                    <div class="item-image-wrapper" onclick="viewProduct(${item.commodity_id})">
+                        <img src="/commodity/${item.merchants_id}/${item.commodity_id}/main.jpg" 
+                             alt="${item.commodity_title}" 
+                             class="item-image"
+                             onerror="this.src='commodity/temp.jpg'">
+                        <div class="image-overlay">
+                            <i class="fas fa-search-plus"></i>
+                        </div>
+                    </div>
+                    
+                    <div class="item-details">
+                        <div class="item-title" onclick="viewProduct(${item.commodity_id})">
+                            ${item.commodity_title}
+                        </div>
+                        <div class="item-meta">
+                            <div class="meta-item">
+                                <i class="fas fa-boxes"></i>
+                                <span>数量: <strong>${item.num}</strong></span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="fas fa-tag"></i>
+                                <span>单价: ¥${item.price}</span>
+                            </div>
+                        </div>
+                        <div class="item-price-info">
+                            <div class="total-price">
+                                <span class="price-symbol">¥</span>${(item.price * item.num).toFixed(2)}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="item-actions">
+                        <button class="btn btn-primary" onclick="buyNow(${item.commodity_id}, ${item.merchants_id}, ${item.num})">
+                            <i class="fas fa-shopping-bag"></i>
+                            立即购买
+                        </button>
+                        <button class="btn btn-danger" onclick="removeFromCart(${item.commodity_id})">
+                            <i class="fas fa-trash-alt"></i>
+                            移除
+                        </button>
+                    </div>
+                `;
+                
+                container.appendChild(itemDiv);
+            });
+        }
+
+        // 更新统计信息
+        function updateStats(items) {
+            const itemCount = items.length;
+            const totalQuantity = items.reduce((sum, item) => sum + parseInt(item.num), 0);
+            const totalAmount = items.reduce((sum, item) => sum + (item.price * item.num), 0);
+
+            document.getElementById('itemCount').textContent = itemCount;
+            document.getElementById('totalQuantity').textContent = totalQuantity;
+            document.getElementById('totalAmount').textContent = totalAmount.toFixed(2);
+            document.getElementById('subtotal').textContent = totalAmount.toFixed(2);
+            document.getElementById('grandTotal').textContent = totalAmount.toFixed(2);
+        }
+
+        // 查看商品详情
+        function viewProduct(commodityId) {
+            window.location.href = `commodity.html?id=${commodityId}`;
+        }
+
+        // 立即购买
+        function buyNow(productId, merchantId, quantity) {
+            window.location.href = `create_order.html?commodity_id=${productId}&merchant_id=${merchantId}&num=${quantity}`;
+        }
+
+        // 从购物车移除商品
         function removeFromCart(commodityId) {
+            if (!confirm('确定要移除这件商品吗？')) {
+                return;
+            }
+
             fetch('./php/cart/cart_remove.php', {
                 method: 'POST',
                 headers: {
@@ -217,41 +955,83 @@
             })
             .then(response => response.json())
             .then(data => {
-                showNotification(data.message);
+                showNotification(data.message || '已移除', 'success');
                 loadCart(userId);
             })
-            .catch(error => console.error('删除商品失败:', error));
+            .catch(error => {
+                console.error('删除商品失败:', error);
+                showNotification('删除失败，请重试', 'error');
+            });
         }
 
-        function buyNow(productId, merchantId, quantity) {
-            window.location.href = `create_order.html?commodity_id=${productId}&merchant_id=${merchantId}&num=${quantity}`;
+        // 清空购物车
+        function clearCart() {
+            if (!confirm('确定要清空购物车吗？此操作不可恢复！')) {
+                return;
+            }
+
+            const promises = cartData.map(item => 
+                fetch('./php/cart/cart_remove.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `user_id=${userId}&commodity_id=${item.commodity_id}`
+                })
+            );
+
+            Promise.all(promises)
+                .then(() => {
+                    showNotification('购物车已清空', 'success');
+                    loadCart(userId);
+                })
+                .catch(error => {
+                    console.error('清空购物车失败:', error);
+                    showNotification('清空失败，请重试', 'error');
+                });
         }
 
-        function showNotification(message) {
+        // 显示通知
+        function showNotification(message, type = 'success') {
+            // 移除旧的通知
+            const oldNotification = document.querySelector('.notification');
+            if (oldNotification) {
+                oldNotification.remove();
+            }
+
             const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.innerText = message;
+            notification.className = `notification ${type}`;
+            
+            const icon = type === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
+            
+            notification.innerHTML = `
+                <i class="${icon}"></i>
+                <span>${message}</span>
+            `;
+            
             document.body.appendChild(notification);
-            notification.style.display = 'block';
+            
+            // 触发显示动画
+            setTimeout(() => notification.classList.add('show'), 10);
+            
+            // 3秒后自动隐藏
             setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => notification.remove(), 500); // 500ms后移除DOM
-            }, 2000); // 2秒后消失
+                notification.classList.remove('show');
+                setTimeout(() => notification.remove(), 400);
+            }, 3000);
         }
 
+        // 禁用右键菜单
         document.addEventListener('contextmenu', function(event) {
             event.preventDefault();
         });
+
+        // 禁用多点触控
+        document.addEventListener('touchstart', function(event) {
+            if (event.touches.length > 1) {
+                event.preventDefault();
+            }
+        }, { passive: false });
     </script>
-</head>
-<body>
-    <div class="header">购物车</div>
-    <div class="empty-cart-message">购物车是空的</div> <!-- 这里是空购物车提示 -->
-    <div class="cart-container" id="cart-container"></div>
-    <div id="footer">
-        <div class="footer-button" onclick="location.href='index.html'">主页</div>
-        <div class="footer-button" onclick="location.href='cart.html'">购物车</div>
-        <div class="footer-button" onclick="location.href='user.html'">我的</div>
-    </div>
 </body>
 </html>

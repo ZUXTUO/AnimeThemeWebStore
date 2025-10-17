@@ -1,188 +1,710 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>商家登录与商品列表</title>
+    <title>商品管理 - 商户端</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #7b68ee;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --dark-bg: #1a1a2e;
+            --card-bg: #16213e;
+            --sidebar-bg: #0f1419;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c1ec;
+            --border-color: #2d3748;
+            --hover-bg: #2d3748;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #2c2c2c;
-            color: #f9f9f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0f3460 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
         }
-        h1, h2 {
-            color: #f9f9f9;
-        }
-        #login-form, #product-list, #add-product-modal {
-            background: #3c3c3c;
+
+        /* 侧边栏样式 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 260px;
+            background: var(--sidebar-bg);
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .sidebar-header i {
+            font-size: 32px;
+            color: var(--primary-color);
+        }
+
+        .sidebar-header h2 {
+            font-size: 22px;
+            font-weight: 600;
+        }
+
+        .nav-menu {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--hover-bg);
+            color: var(--text-primary);
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            font-size: 18px;
+            width: 20px;
+        }
+
+        /* 主内容区域 */
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        /* 登录卡片 */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            margin-left: 0;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            width: 100%;
+            max-width: 450px;
+            border: 1px solid var(--border-color);
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .login-header i {
+            font-size: 48px;
+            color: var(--success-color);
+            margin-bottom: 15px;
+        }
+
+        .login-header h1 {
+            font-size: 26px;
+            margin-bottom: 8px;
+        }
+
+        /* 顶部栏 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* 搜索栏 */
+        .search-bar {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 45px;
+            background: var(--dark-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .search-wrapper {
+            position: relative;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        /* 表单输入 */
+        .form-group {
             margin-bottom: 20px;
         }
-        input[type="text"], input[type="password"], input[type="number"], input[type="file"], textarea {
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .form-input, .form-textarea, .form-select {
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #555;
-            border-radius: 5px;
-            background-color: #444;
-            color: #f9f9f9;
+            padding: 12px 16px;
+            background: var(--dark-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-family: inherit;
         }
-        input[type="submit"], button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-            margin: 5px 0;
-        }
-        input[type="submit"]:hover, button:hover {
-            background-color: #218838;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            overflow-y: auto; /* 添加垂直滚动条 */
-            display: block; /* 使其能滚动 */
-        }
-        th, td {
-            border: 1px solid #555;
-            padding: 10px;
-            text-align: left;
-        }
-        th {
-            background-color: #4c4c4c;
-        }
-        tr {
-            height: 60px;
-        }
-        .editable {
-            width: 100%;
-            height: 40px;
+
+        .form-textarea {
+            min-height: 100px;
             resize: vertical;
         }
-        .editable.textarea {
-            height: 60px;
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
         }
-        .product-image {
-            width: 50px;
-            height: auto;
-            border-radius: 5px;
+
+        /* 按钮样式 */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
         }
-        #add-product-modal {
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: #000;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 13px;
+        }
+
+        /* 商品网格 */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        .product-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .product-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--dark-bg);
+        }
+
+        .product-id {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .product-images {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .image-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 8px;
+            cursor: pointer;
+            aspect-ratio: 1;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.3s ease;
+        }
+
+        .image-wrapper:hover .product-image {
+            transform: scale(1.1);
+        }
+
+        .image-label {
+            position: absolute;
+            bottom: 8px;
+            left: 8px;
+            right: 8px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            padding: 6px 10px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .product-body {
+            padding: 16px;
+        }
+
+        .product-actions {
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+        }
+
+        /* 徽章 */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: rgba(40, 167, 69, 0.2);
+            color: var(--success-color);
+        }
+
+        .badge-danger {
+            background: rgba(220, 53, 69, 0.2);
+            color: var(--danger-color);
+        }
+
+        .badge-warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: var(--warning-color);
+        }
+
+        /* 模态框 */
+        .modal {
             display: none;
             position: fixed;
-            z-index: 1;
+            z-index: 2000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
         }
+
         .modal-content {
-            background-color: #3c3c3c;
-            margin: 15% auto;
-            padding: 20px;
-            border-radius: 10px;
-            width: 80%;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            position: relative;
+            background: var(--card-bg);
+            margin: 5% auto;
+            padding: 0;
+            width: 90%;
+            max-width: 600px;
+            border-radius: 16px;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlideIn 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
         }
+
+        @keyframes modalSlideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--card-bg);
+            z-index: 1;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+        }
+
+        .close {
+            color: var(--text-secondary);
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .close:hover {
+            color: var(--danger-color);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 24px;
+        }
+
+        /* 分页 */
         .pagination {
             display: flex;
             justify-content: center;
-            margin-top: 20px;
-            gap: 20px; /* 设置按钮之间的间隔 */
+            align-items: center;
+            gap: 8px;
+            padding: 24px;
         }
-        .page-item {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 5px;
+
+        .pagination button {
+            min-width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border-radius: 8px;
             cursor: pointer;
-            margin: 0 5px;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            font-weight: 600;
         }
-        .page-item:hover {
-            background-color: #218838;
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--hover-bg);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
         }
-        .page-item.active {
-            background-color: #218838;
-            font-weight: bold;
+
+        .pagination button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .pagination .ellipsis {
+            color: var(--text-secondary);
+            padding: 0 8px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .top-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
         }
     </style>
 </head>
 <body>
-    <h1 id="page-title">商家登录</h1>
-    
-    <div id="login-form">
-        <form id="loginForm">
-            <label for="id">商家 ID:</label>
-            <input type="text" id="id" name="id" required>
-            <label for="password">密码:</label>
-            <input type="password" id="password" name="password" required>
-            <input type="submit" value="登录">
+    <!-- 登录界面 -->
+    <div id="login-form" class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-store"></i>
+                <h1>商户登录</h1>
+                <p>请输入您的商户凭证</p>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-id-card"></i> 商户 ID</label>
+                    <input type="text" id="id" name="id" class="form-input" placeholder="请输入商户ID" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label"><i class="fas fa-lock"></i> 密码</label>
+                    <input type="password" id="password" name="password" class="form-input" placeholder="请输入密码" required>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-sign-in-alt"></i> 登录
+                </button>
         </form>
+        </div>
+    </div>
+
+    <!-- 主内容区域 -->
+    <div id="product-list" class="hidden">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-store"></i>
+                <h2 id="merchantName">商户端</h2>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="index.html" class="nav-link active">
+                        <i class="fas fa-box"></i>
+                        <span>商品管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="manager.html" class="nav-link">
+                        <i class="fas fa-clipboard-list"></i>
+                        <span>订单管理</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="order_time_management.html" class="nav-link" target="_blank">
+                        <i class="fas fa-robot"></i>
+                        <span>自动管理</span>
+                    </a>
+                </li>
+                <li class="nav-item" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                    <a href="#" class="nav-link" onclick="logout(); return false;">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>退出登录</span>
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容 -->
+        <main class="main-content">
+            <div class="top-bar">
+                <h1 class="page-title">
+                    <i class="fas fa-box"></i> 商品管理
+                </h1>
+                <div class="top-actions">
+                    <button class="btn btn-primary" onclick="showAddProductModal()">
+                        <i class="fas fa-plus"></i> 添加商品
+                    </button>
+                    <button class="btn btn-success" onclick="reloadImages()">
+                        <i class="fas fa-sync"></i> 刷新图片
+                    </button>
+                </div>
     </div>
     
-    <div id="product-list" style="display:none;">
+            <!-- 搜索栏 -->
+            <div class="search-bar">
+                <div class="search-wrapper">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" 
+                           id="search-input" 
+                           class="search-input" 
+                           placeholder="搜索商品名称或信息..." 
+                           oninput="searchProducts()">
+                </div>
+            </div>
 
-        <div id="search-container">
-            <input type="text" id="search-input" placeholder="搜索商品信息..." oninput="searchProducts()">
+            <!-- 商品网格 -->
+            <div id="products" class="products-grid">
+                <!-- 商品卡片将在这里动态生成 -->
         </div>
         
-        <h2>商品列表</h2>
-        <button onclick="reloadImages()">重新加载图片缓存</button>
-        <button onclick="showAddProductModal()">添加商品</button>
-        <button style="background-color: #dc3545; color: white;" onclick="location.href='manager.html'">订单管理</button>
-        <table>
-            <thead>
-                <tr>
-                    <th>商品 ID</th>
-                    <th>商品名</th>
-                    <th>信息</th>
-                    <th>价格</th>
-                    <th>库存</th>
-                    <th>可见</th>
-                    <th>主图</th>
-                    <th>详情图</th>
-                    <th>需要定金</th>
-                    <th>定金商品 ID</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody id="products"></tbody>
-        </table>
-        <div class="pagination" id="pagination"></div>
-        <button style="background-color: #dc3545; color: white;" onclick="window.open('order_time_management.html', '_blank')">自动管理平台(一定要在后台给它留一个窗口)</button>
-        <button style="background-color: #dc8e35; color: white;" onclick="logout()">登出</button>
+            <!-- 分页 -->
+            <div id="pagination" class="pagination"></div>
+        </main>
     </div>
 
-    <div id="add-product-modal">
+    <!-- 添加商品模态框 -->
+    <div id="add-product-modal" class="modal">
         <div class="modal-content">
-            <h2>添加商品</h2>
-            <label for="new-title">商品名:</label>
-            <input type="text" id="new-title" required>
-            <label for="new-info">商品信息:</label>
-            <textarea id="new-info" required></textarea>
-            <label for="new-price">价格:</label>
-            <input type="number" id="new-price" required>
-            <label for="new-inventory">库存:</label>
-            <input type="number" id="new-inventory" required>
-            <label for="new-view">可见:</label>
-            <select id="new-view">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus-circle"></i> 添加新商品</h2>
+                <span class="close" onclick="closeAddProductModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form id="addProductForm" onsubmit="addProduct(event)">
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-tag"></i> 商品名称</label>
+                        <input type="text" id="new-title" class="form-input" placeholder="请输入商品名称" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-info-circle"></i> 商品信息</label>
+                        <textarea id="new-info" class="form-textarea" placeholder="请输入商品详细信息" required></textarea>
+                    </div>
+                    <div class="field-row">
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-dollar-sign"></i> 价格</label>
+                            <input type="number" id="new-price" class="form-input" placeholder="0.00" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-boxes"></i> 库存</label>
+                            <input type="number" id="new-inventory" class="form-input" placeholder="0" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-eye"></i> 是否可见</label>
+                        <select id="new-view" class="form-select">
                 <option value="1">是</option>
                 <option value="0">否</option>
             </select>
-            <button onclick="addProduct()">添加</button>
-            <button onclick="closeAddProductModal()">关闭</button>
+                    </div>
+                    <button type="submit" class="btn btn-success" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-check"></i> 添加商品
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -190,19 +712,20 @@
         let currentPage = 1;
         const itemsPerPage = 10;
         let productsData = [];
+        let filteredProducts = [];
 
         window.onload = function() {
             const merchantId = localStorage.getItem('merchantId');
             if (merchantId) {
                 document.getElementById('login-form').style.display = 'none';
-                document.getElementById('product-list').style.display = 'block';
+                document.getElementById('product-list').classList.remove('hidden');
                 loadProducts(merchantId);
             }
         };
 
-        document.getElementById('loginForm').onsubmit = async function(event) {
+        async function handleLogin(event) {
             event.preventDefault();
-            const formData = new FormData(this);
+            const formData = new FormData(event.target);
             const response = await fetch('../../php/admin/login.php', {
                 method: 'POST',
                 body: formData
@@ -211,20 +734,20 @@
             const result = await response.json();
             if (result.success) {
                 const merchantId = document.getElementById('id').value;
-                document.getElementById('page-title').innerText = '欢迎, ' + result.name;
+                document.getElementById('merchantName').innerText = result.name;
                 document.getElementById('login-form').style.display = 'none';
-                document.getElementById('product-list').style.display = 'block';
+                document.getElementById('product-list').classList.remove('hidden');
                 localStorage.setItem('merchantId', merchantId);
                 loadProducts(merchantId);
             } else {
                 alert(result.message);
             }
-        };
+        }
 
         async function loadProducts(merchantId) {
             const response = await fetch('../../php/admin/getMerchantShop.php?merchantId=' + merchantId);
             productsData = await response.json();
-            console.warn(productsData);
+            filteredProducts = [...productsData];
             displayProducts();
         }
 
@@ -233,105 +756,104 @@
             productList.innerHTML = '';
             const start = (currentPage - 1) * itemsPerPage;
             const end = start + itemsPerPage;
-            const paginatedItems = productsData.slice(start, end);
+            const paginatedItems = filteredProducts.slice(start, end);
 
             paginatedItems.forEach(product => {
-                const row = createProductRow(product);
-                productList.appendChild(row);
+                const card = createProductCard(product);
+                productList.appendChild(card);
             });
 
-            setupPagination(productsData.length);
+            setupPagination();
         }
 
-        function setupPagination() {
-		        const pagination = document.getElementById('pagination'); // 获取分页容器
-		        pagination.innerHTML = ''; // 清空现有的分页内容
-		        const totalPages = Math.ceil(productsData.length / itemsPerPage); // 计算总页数
+        function createProductCard(product) {
+            const mainImageSrc = product.merchants_id && product.Id
+                ? `../../commodity/${product.merchants_id}/${product.Id}/main.jpg`
+                : '../../commodity/temp.jpg';
+            const infoImageSrc = product.merchants_id && product.Id
+                ? `../../commodity/${product.merchants_id}/${product.Id}/info.jpg`
+                : '../../commodity/temp.jpg';
 
-		        const range = 2; // 当前页周围显示的页码数量
+            const card = document.createElement('div');
+            card.classList.add('product-card');
+            card.innerHTML = `
+                <div class="product-header">
+                    <div class="product-id">
+                        <i class="fas fa-hashtag"></i> ID: ${product.Id}
+                    </div>
+                    <span class="badge ${product.view == 1 ? 'badge-success' : 'badge-danger'}">
+                        <i class="fas fa-${product.view == 1 ? 'eye' : 'eye-slash'}"></i>
+                        ${product.view == 1 ? '可见' : '隐藏'}
+                    </span>
+                </div>
 
-		        // 创建"第一页"按钮
-		        if (currentPage > 1) {
-				        const firstButton = document.createElement('button'); // 创建按钮元素
-				        firstButton.innerText = '第一页'; // 设置按钮文本为"第一页"
-				        firstButton.onclick = () => changePage(1); // 点击时切换到第一页
-				        firstButton.style.fontWeight = 'bold'; // 加粗文本
-				        firstButton.style.fontSize = '18px'; // 设置字体大小
-				        pagination.appendChild(firstButton); // 添加按钮到分页容器
-				        if (currentPage > range + 1) { // 如果当前页大于范围+1
-						        pagination.appendChild(document.createTextNode('...')); // 添加省略号
-				        }
-		        }
+                <div class="product-images">
+                    <div class="image-wrapper" onclick="selectImage(${product.Id}, 'main')">
+                        <img src="${mainImageSrc}" class="product-image" alt="主图">
+                        <div class="image-label">
+                            <i class="fas fa-image"></i> 主图
+                        </div>
+                    </div>
+                    <div class="image-wrapper" onclick="selectImage(${product.Id}, 'info')">
+                        <img src="${infoImageSrc}" class="product-image" alt="详情图">
+                        <div class="image-label">
+                            <i class="fas fa-info-circle"></i> 详情图
+                        </div>
+                    </div>
+                </div>
 
-		        // 显示当前页和邻近的页码
-		        for (let i = Math.max(1, currentPage - range); i <= Math.min(totalPages, currentPage + range); i++) {
-				        const pageButton = document.createElement('button'); // 创建页码按钮
-				        pageButton.innerText = i; // 设置按钮文本为页码
-				        pageButton.onclick = () => changePage(i); // 点击时切换到对应页
-				        pageButton.style.fontWeight = 'bold'; // 加粗文本
-				        pageButton.style.fontSize = '18px'; // 设置字体大小
-				        if (i === currentPage) { // 如果是当前页
-						        pageButton.disabled = true; // 禁用按钮
-				        }
-				        pagination.appendChild(pageButton); // 添加按钮到分页容器
-		        }
+                <div class="product-body">
+                    <div class="form-group">
+                        <label class="form-label">商品名称</label>
+                        <textarea class="form-textarea" style="min-height: 60px;" data-id="${product.Id}" data-field="commodity_title">${product.commodity_title}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">商品信息</label>
+                        <textarea class="form-textarea" data-id="${product.Id}" data-field="commodity_info">${product.commodity_info}</textarea>
+                    </div>
+                    <div class="field-row">
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-dollar-sign"></i> 价格</label>
+                            <input type="number" class="form-input" value="${product.price}" data-id="${product.Id}" data-field="price" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-boxes"></i> 库存</label>
+                            <input type="number" class="form-input" value="${product.inventory}" data-id="${product.Id}" data-field="inventory">
+                        </div>
+                    </div>
+                    <div class="field-row">
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-eye"></i> 可见</label>
+                            <select class="form-select" data-id="${product.Id}" data-field="view">
+                                <option value="1" ${product.view == 1 ? 'selected' : ''}>是</option>
+                                <option value="0" ${product.view == 0 ? 'selected' : ''}>否</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label"><i class="fas fa-money-check-alt"></i> 需定金</label>
+                            <select class="form-select" data-id="${product.Id}" data-field="need_deposit">
+                                <option value="1" ${product.need_deposit == 1 ? 'selected' : ''}>是</option>
+                                <option value="0" ${product.need_deposit == 0 ? 'selected' : ''}>否</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label"><i class="fas fa-link"></i> 定金商品ID</label>
+                        <input type="number" class="form-input" value="${product.deposit_commodity_id}" data-id="${product.Id}" data-field="deposit_commodity_id">
+                    </div>
+                </div>
 
-		        // 创建"最后一页"按钮
-		        if (currentPage < totalPages) { // 如果当前页小于总页数
-				        if (currentPage < totalPages - range) { // 如果当前页小于总页数-范围
-						        pagination.appendChild(document.createTextNode('...')); // 添加省略号
-				        }
-				        const lastButton = document.createElement('button'); // 创建按钮元素
-				        lastButton.innerText = '最后一页'; // 设置按钮文本为"最后一页"
-				        lastButton.onclick = () => changePage(totalPages); // 点击时切换到最后一页
-                        lastButton.style.fontWeight = 'bold'; // 加粗文本
-                        lastButton.style.fontSize = '18px'; // 设置字体大小
-				        pagination.appendChild(lastButton); // 添加按钮到分页容器
-		        }
-        }
+                <div class="product-actions">
+                    <button class="btn btn-success btn-sm" onclick="syncProduct(${product.Id})" style="flex: 1;">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                </div>
 
-        function changePage(page) {
-            currentPage = page;
-            displayProducts();
-        }
+                <input type="file" id="main-image-${product.Id}" style="display:none;" accept="image/*" onchange="uploadImage(${product.Id}, 'main', this.files[0], this)">
+                <input type="file" id="info-image-${product.Id}" style="display:none;" accept="image/*" onchange="uploadImage(${product.Id}, 'info', this.files[0], this)">
+            `;
 
-        function showAddProductModal() {
-            document.getElementById('add-product-modal').style.display = 'block';
-        }
-
-        function closeAddProductModal() {
-            document.getElementById('add-product-modal').style.display = 'none';
-        }
-
-        async function addProduct() {
-            const merchantId = localStorage.getItem('merchantId');
-            const newTitle = document.getElementById('new-title').value;
-            const newInfo = document.getElementById('new-info').value;
-            const newPrice = document.getElementById('new-price').value;
-            const newInventory = document.getElementById('new-inventory').value;
-            const newView = document.getElementById('new-view').value;
-
-            const productData = {
-                merchants_id: merchantId,
-                commodity_title: newTitle,
-                commodity_info: newInfo,
-                price: newPrice,
-                inventory: newInventory,
-                view: newView
-            };
-
-            const response = await fetch('../../php/admin/addProduct.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(productData)
-            });
-
-            const result = await response.json();
-            alert(result.message);
-            closeAddProductModal();
-            loadProducts(merchantId);
+            return card;
         }
 
         function selectImage(productId, type) {
@@ -352,44 +874,27 @@
 
             const result = await response.json();
             if (result.success) {
-                const imgElement = inputElement.previousElementSibling;
-                imgElement.src = `../../commodity/${localStorage.getItem('merchantId')}/${productId}/${type === 'main' ? 'main.jpg' : 'info.jpg'}?t=${new Date().getTime()}`;
+                alert('图片上传成功！');
+                loadProducts(localStorage.getItem('merchantId'));
+            } else {
+                alert(result.message);
             }
         }
 
         function reloadImages() {
-            const products = document.querySelectorAll('#products tr');
-            products.forEach(row => {
-                const productId = row.cells[0].innerText;
-                const mainImage = row.querySelector('img[alt="主图"]');
-                const infoImage = row.querySelector('img[alt="详情图"]');
-                mainImage.src = `../../commodity/${localStorage.getItem('merchantId')}/${productId}/main.jpg?t=${new Date().getTime()}`;
-                infoImage.src = `../../commodity/${localStorage.getItem('merchantId')}/${productId}/info.jpg?t=${new Date().getTime()}`;
-            });
-        }
-
-        async function updateProduct(productId, field, value) {
-            console.log(`Updating product ${productId}: ${field} = ${value}`);
+            loadProducts(localStorage.getItem('merchantId'));
         }
 
         async function syncProduct(productId) {
-            const row = Array.from(document.querySelectorAll('#products tr')).find(r => r.cells[0].innerText == productId);
-            if (!row) {
-                console.error('Product row not found for ID:', productId);
-                return;
-            }
-            const inputs = row.querySelectorAll('.editable');
+            const inputs = document.querySelectorAll(`[data-id="${productId}"]`);
             const updatedData = {
-                Id: productId,
-                commodity_title: inputs[0].value,
-                commodity_info: inputs[1].value,
-                price: inputs[2].value,
-                inventory: inputs[3].value,
-                view: row.querySelector('select').value,
-                need_deposit: row.querySelector('select[onchange*="need_deposit"]').value,
-                deposit_commodity_id: inputs[4].value
+                Id: productId
             };
 
+            inputs.forEach(input => {
+                const field = input.getAttribute('data-field');
+                updatedData[field] = input.value;
+            });
 
             const response = await fetch('../../php/admin/syncProduct.php', {
                 method: 'POST',
@@ -403,75 +908,155 @@
             alert(result.message);
         }
 
-        function createProductRow(product) {
-            const mainImageSrc = product.merchants_id && product.Id
-                ? `../../commodity/${product.merchants_id}/${product.Id}/main.jpg`
-                : '../../commodity/temp.jpg';
-            const infoImageSrc = product.merchants_id && product.Id
-                ? `../../commodity/${product.merchants_id}/${product.Id}/info.jpg`
-                : '../../commodity/temp.jpg';
+        function showAddProductModal() {
+            document.getElementById('add-product-modal').style.display = 'block';
+        }
 
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${product.Id}</td>
-                <td><textarea class="editable textarea" onchange="updateProduct(${product.Id}, 'commodity_title', this.value)">${product.commodity_title}</textarea></td>
-                <td><textarea class="editable textarea" onchange="updateProduct(${product.Id}, 'commodity_info', this.value)">${product.commodity_info}</textarea></td>
-                <td><input type="number" class="editable" value="${product.price}" onchange="updateProduct(${product.Id}, 'price', this.value)"></td>
-                <td><input type="number" class="editable" value="${product.inventory}" onchange="updateProduct(${product.Id}, 'inventory', this.value)"></td>
-                <td>
-                    <select onchange="updateProduct(${product.Id}, 'view', this.value)">
-                        <option value="1" ${product.view == 1 ? 'selected' : ''}>是</option>
-                        <option value="0" ${product.view == 0 ? 'selected' : ''}>否</option>
-                    </select>
-                </td>
-                <td>
-                    <img src="${mainImageSrc}" class="product-image" alt="主图" onclick="selectImage(${product.Id}, 'main')">
-                    <input type="file" id="main-image-${product.Id}" style="display:none;" accept="image/*" onchange="uploadImage(${product.Id}, 'main', this.files[0], this)">
-                </td>
-                <td>
-                    <img src="${infoImageSrc}" class="product-image" alt="详情图" onclick="selectImage(${product.Id}, 'info')">
-                    <input type="file" id="info-image-${product.Id}" style="display:none;" accept="image/*" onchange="uploadImage(${product.Id}, 'info', this.files[0], this)">
-                </td>
-                <td>
-                    <select onchange="updateProduct(${product.Id}, 'need_deposit', this.value)">
-                        <option value="1" ${product.need_deposit == 1 ? 'selected' : ''}>是</option>
-                        <option value="0" ${product.need_deposit == 0 ? 'selected' : ''}>否</option>
-                    </select>
-                </td>
-                <td><input type="number" class="editable" value="${product.deposit_commodity_id}" onchange="updateProduct(${product.Id}, 'deposit_commodity_id', this.value)"></td>
-                <td><button onclick="syncProduct(${product.Id})">同步</button></td>`;
-            return row;
+        function closeAddProductModal() {
+            document.getElementById('add-product-modal').style.display = 'none';
+            document.getElementById('addProductForm').reset();
+        }
+
+        async function addProduct(event) {
+            event.preventDefault();
+            const merchantId = localStorage.getItem('merchantId');
+            
+            const productData = {
+                merchants_id: merchantId,
+                commodity_title: document.getElementById('new-title').value,
+                commodity_info: document.getElementById('new-info').value,
+                price: document.getElementById('new-price').value,
+                inventory: document.getElementById('new-inventory').value,
+                view: document.getElementById('new-view').value
+            };
+
+            const response = await fetch('../../php/admin/addProduct.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(productData)
+            });
+
+            const result = await response.json();
+            alert(result.message);
+            if (result.success) {
+                closeAddProductModal();
+                loadProducts(merchantId);
+            }
         }
 
         function searchProducts() {
             const query = document.getElementById('search-input').value.toLowerCase();
-            const filteredProducts = productsData.filter(product => 
+            filteredProducts = productsData.filter(product => 
                 product.commodity_title.toLowerCase().includes(query) ||
-                product.commodity_info.toLowerCase().includes(query)
+                product.commodity_info.toLowerCase().includes(query) ||
+                product.Id.toString().includes(query)
             );
-            displayFilteredProducts(filteredProducts);
+            currentPage = 1;
+            displayProducts();
         }
 
-        function displayFilteredProducts(filteredProducts) {
-            const productList = document.getElementById('products');
-            productList.innerHTML = '';
+        function setupPagination() {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
-            const start = (currentPage - 1) * itemsPerPage;
-            const end = start + itemsPerPage;
-            const paginatedItems = filteredProducts.slice(start, end);
+            if (totalPages <= 1) return;
 
-            paginatedItems.forEach(product => {
-                const row = createProductRow(product);
-                productList.appendChild(row);
-            });
+            const range = 2;
 
-            setupPagination(filteredProducts.length);
+            // 上一页
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = () => changePage(currentPage - 1);
+            pagination.appendChild(prevButton);
+
+            // 第一页
+            if (currentPage > 1) {
+                const firstButton = document.createElement('button');
+                firstButton.innerText = '1';
+                firstButton.onclick = () => changePage(1);
+                pagination.appendChild(firstButton);
+
+                if (currentPage > range + 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.className = 'ellipsis';
+                    ellipsis.innerText = '...';
+                    pagination.appendChild(ellipsis);
+                }
+            }
+
+            // 当前页附近
+            for (let i = Math.max(2, currentPage - range); i <= Math.min(totalPages - 1, currentPage + range); i++) {
+                const button = document.createElement('button');
+                button.innerText = i;
+                button.onclick = () => changePage(i);
+                if (i === currentPage) {
+                    button.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+                    button.style.borderColor = 'transparent';
+                    button.disabled = true;
+                }
+                pagination.appendChild(button);
+            }
+
+            // 最后一页
+            if (currentPage < totalPages) {
+                if (currentPage < totalPages - range - 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.className = 'ellipsis';
+                    ellipsis.innerText = '...';
+                    pagination.appendChild(ellipsis);
+                }
+                
+                if (totalPages > 1) {
+                    const lastButton = document.createElement('button');
+                    lastButton.innerText = totalPages;
+                    lastButton.onclick = () => changePage(totalPages);
+                    if (totalPages === currentPage) {
+                        lastButton.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+                        lastButton.style.borderColor = 'transparent';
+                        lastButton.disabled = true;
+                    }
+                    pagination.appendChild(lastButton);
+                }
+            } else if (totalPages === 1) {
+                const firstButton = document.createElement('button');
+                firstButton.innerText = '1';
+                firstButton.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+                firstButton.style.borderColor = 'transparent';
+                firstButton.disabled = true;
+                pagination.appendChild(firstButton);
+            }
+
+            // 下一页
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.onclick = () => changePage(currentPage + 1);
+            pagination.appendChild(nextButton);
+        }
+
+        function changePage(page) {
+            currentPage = page;
+            displayProducts();
+            window.scrollTo(0, 0);
         }
 
         function logout() {
+            if (confirm('确定要退出登录吗？')) {
             localStorage.removeItem('merchantId');
-            document.getElementById('login-form').style.display = 'block';
-            document.getElementById('product-list').style.display = 'none';
+                document.getElementById('login-form').style.display = 'flex';
+                document.getElementById('product-list').classList.add('hidden');
+            }
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('add-product-modal');
+            if (event.target == modal) {
+                closeAddProductModal();
+            }
         }
     </script>
 </body>

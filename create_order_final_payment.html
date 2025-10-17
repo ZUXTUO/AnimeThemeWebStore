@@ -3,135 +3,541 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>创建订单-绑定订单</title>
+    <title>创建订单 - 绑定尾款</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
+        * {
             margin: 0;
-            font-family: 'Arial', sans-serif;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #7b68ee;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ff9800;
+            --info-color: #17a2b8;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-color: #e0e6ed;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('img/bg.jpg');
             background-size: cover;
             background-position: center;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
+            background-attachment: fixed;
+            min-height: 100vh;
             padding: 15px;
-            box-sizing: border-box;
-        }
-        .order-container {
-            flex: 1;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin: 20px auto;
-            width: 90%;
-            max-width: 800px;
+            justify-content: center;
         }
+
+        /* 尾款标识 */
+        .deposit-badge {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, var(--warning-color), #fb8c00);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: 600;
+            box-shadow: var(--shadow-lg);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .order-container {
+            width: 100%;
+            max-width: 700px;
+            background: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            padding: 30px;
+            animation: fadeInUp 0.6s ease;
+            border: 2px solid rgba(255, 152, 0, 0.3);
+        }
+
         .header {
             text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header-title {
             font-size: 2em;
-            font-weight: bold;
-            color: black;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .header-icon {
+            font-size: 1.2em;
+            color: var(--warning-color);
+        }
+
+        .header-subtitle {
+            font-size: 0.9em;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        /* 绑定信息卡片 */
+        .deposit-info-card {
+            background: linear-gradient(135deg, #fff8f0, #ffe8d6);
+            border-radius: 16px;
+            padding: 20px;
             margin-bottom: 20px;
+            border-left: 4px solid var(--warning-color);
+            box-shadow: 0 2px 12px rgba(255, 152, 0, 0.1);
         }
+
+        .deposit-info-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.15em;
+            font-weight: 700;
+            color: var(--warning-color);
+            margin-bottom: 16px;
+        }
+
+        .deposit-info-content {
+            display: grid;
+            gap: 10px;
+        }
+
+        .deposit-info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+            font-size: 0.95em;
+        }
+
+        .deposit-info-item i {
+            color: var(--warning-color);
+            width: 18px;
+        }
+
+        .deposit-info-item strong {
+            color: var(--warning-color);
+        }
+
         .order-item {
-            background-color: white;
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 10px;
-            width: 100%;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            border: 1px solid var(--border-color);
         }
-        .input-field {
-            margin: 10px 0;
-            width: 100%;
+
+        .section-title {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--warning-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .input-field label {
-            display: block;
-            margin-bottom: 5px;
+
+        .order-summary {
+            display: grid;
+            gap: 12px;
         }
-        .input-field input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .button-container {
+
+        .summary-item {
             display: flex;
             justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-label {
+            color: var(--text-secondary);
+            font-size: 0.95em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-label i {
+            color: var(--warning-color);
+            width: 18px;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .summary-item.total {
+            background: linear-gradient(135deg, #fff8f0, #ffe8d6);
+            padding: 14px;
+            border-radius: 12px;
+            margin-top: 8px;
+            border: 2px solid rgba(255, 152, 0, 0.3);
+        }
+
+        .summary-item.total .summary-label {
+            font-size: 1.1em;
+            font-weight: 700;
+            color: var(--warning-color);
+        }
+
+        .summary-item.total .summary-value {
+            font-size: 1.5em;
+            font-weight: 800;
+            color: var(--warning-color);
+        }
+
+        .input-field {
+            margin-bottom: 20px;
+        }
+
+        .input-field label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95em;
+        }
+
+        .input-field label i {
+            color: var(--warning-color);
+        }
+
+        .input-field input {
             width: 100%;
-            margin-top: 20px;
+            padding: 12px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            background: white;
         }
-        #confirm-button, #back-button {
-            background-color: #87CEEB;
-            color: white;
+
+        .input-field input:focus {
+            outline: none;
+            border-color: var(--warning-color);
+            box-shadow: 0 0 0 3px rgba(255, 152, 0, 0.1);
+        }
+
+        .button-container {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 24px;
             border: none;
-            border-radius: 10px;
-            padding: 10px 20px;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 1em;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-        #confirm-button:hover, #back-button:hover {
-            background-color: #00BFFF;
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--warning-color), #fb8c00);
+            color: white;
+            box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
         }
-        .order-summary {
-            font-size: 1em;
-            margin: 5px 0;
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
         }
+
+        .btn-primary:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        /* 通知消息 */
         .notification {
             display: none;
             position: fixed;
-            bottom: 20px;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background-color: #4CAF50; /* 绿色 */
-            color: white;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
+            background: white;
+            color: var(--text-primary);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            z-index: 10000;
+            animation: slideDown 0.3s ease;
+            border-left: 4px solid var(--success-color);
+            min-width: 250px;
+            text-align: center;
+            font-weight: 500;
         }
-        .total_price_text {
-            font-weight: bold;
-            color: rgb(188, 0, 0);
+
+        .notification i {
+            margin-right: 8px;
+        }
+
+        .notification.error {
+            border-left-color: var(--danger-color);
+        }
+
+        .notification.warning {
+            border-left-color: var(--warning-color);
+        }
+
+        /* 动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .deposit-badge {
+                top: 10px;
+                right: 10px;
+                font-size: 0.85em;
+                padding: 7px 14px;
+            }
+
+            .order-container {
+                padding: 20px;
+            }
+
+            .header-title {
+                font-size: 1.6em;
+            }
+
+            .order-item {
+                padding: 18px;
+            }
+
+            .summary-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+
+            .button-container {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .deposit-badge {
+                font-size: 0.8em;
+                padding: 6px 12px;
+            }
+
+            .order-container {
+                padding: 16px;
+            }
+
+            .header-title {
+                font-size: 1.4em;
+            }
+
+            .section-title {
+                font-size: 1.1em;
+            }
+
+            .summary-item.total .summary-value {
+                font-size: 1.3em;
+            }
+
+            .deposit-info-card {
+                padding: 16px;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- 尾款商品标识 -->
+    <div class="deposit-badge">
+        <i class="fas fa-link"></i>
+        绑定尾款订单
+    </div>
+
     <div class="order-container">
-        <div class="header">创建订单</div>
-        <div class="order-item">
-            <div class="order-summary">
-                <p>商品ID: <span id="commodity_id_text"></span></p>
-                <p>上一笔绑定商品ID: <span id="deposit_commodity_id_text"></span></p>
-                <p>上一笔绑定订单编号: <span id="deposit_order_id_text"></span></p>
-                <p>商品数量: <span id="num_text"></span></p>
-                <p>商品名称: <span id="commodity_title_text"></span></p>
-                <p>商品单价: <span id="commodity_price_text"></span> 元</p>
-                <p>应付款: <span id="total_price_text" style="color: red; font-weight: bold;"></span> 元</p>
-                <p>商家名称: <span id="merchant_name_text"></span></p>
+        <div class="header">
+            <div class="header-title">
+                <i class="fas fa-file-invoice header-icon"></i>
+                创建尾款订单
             </div>
-            <div class="input-field">
-                <label for="consignee_name">收货人姓名</label>
-                <input type="text" id="consignee_name" required>
+            <div class="header-subtitle">支付绑定商品的尾款</div>
+        </div>
+
+        <!-- 绑定信息提示 -->
+        <div class="deposit-info-card">
+            <div class="deposit-info-title">
+                <i class="fas fa-info-circle"></i>
+                绑定订单信息
             </div>
-            <div class="input-field">
-                <label for="phone_number">收货人电话</label>
-                <input type="text" id="phone_number" required>
-            </div>
-            <div class="input-field">
-                <label for="delivery_address">收货地址</label>
-                <input type="text" id="delivery_address" required>
+            <div class="deposit-info-content">
+                <div class="deposit-info-item">
+                    <i class="fas fa-box"></i>
+                    绑定商品ID: <strong id="deposit_commodity_id_text">-</strong>
+                </div>
+                <div class="deposit-info-item">
+                    <i class="fas fa-receipt"></i>
+                    绑定订单编号: <strong id="deposit_order_id_text">-</strong>
+                </div>
             </div>
         </div>
+
+        <div class="order-item">
+            <div class="section-title">
+                <i class="fas fa-shopping-bag"></i>
+                订单信息
+            </div>
+            <div class="order-summary">
+                <div class="summary-item">
+                    <span class="summary-label">
+                        <i class="fas fa-tag"></i> 商品名称
+                    </span>
+                    <span class="summary-value" id="commodity_title_text">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">
+                        <i class="fas fa-barcode"></i> 商品ID
+                    </span>
+                    <span class="summary-value" id="commodity_id_text">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">
+                        <i class="fas fa-cubes"></i> 商品数量
+                    </span>
+                    <span class="summary-value" id="num_text">-</span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">
+                        <i class="fas fa-money-bill-wave"></i> 商品单价
+                    </span>
+                    <span class="summary-value">¥<span id="commodity_price_text">0</span></span>
+                </div>
+                <div class="summary-item">
+                    <span class="summary-label">
+                        <i class="fas fa-store"></i> 商家名称
+                    </span>
+                    <span class="summary-value" id="merchant_name_text">-</span>
+                </div>
+                <div class="summary-item total">
+                    <span class="summary-label">
+                        <i class="fas fa-wallet"></i> 应付尾款
+                    </span>
+                    <span class="summary-value">¥<span id="total_price_text">0</span></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="order-item">
+            <div class="section-title">
+                <i class="fas fa-shipping-fast"></i>
+                收货信息
+            </div>
+            <div class="input-field">
+                <label for="consignee_name">
+                    <i class="fas fa-user"></i> 收货人姓名
+                </label>
+                <input type="text" id="consignee_name" placeholder="请输入收货人姓名" required>
+            </div>
+            <div class="input-field">
+                <label for="phone_number">
+                    <i class="fas fa-phone"></i> 收货人电话
+                </label>
+                <input type="tel" id="phone_number" placeholder="请输入11位手机号码" required maxlength="11">
+            </div>
+            <div class="input-field">
+                <label for="delivery_address">
+                    <i class="fas fa-map-marker-alt"></i> 收货地址
+                </label>
+                <input type="text" id="delivery_address" placeholder="请输入详细收货地址" required>
+            </div>
+        </div>
+
         <div class="button-container">
-            <button id="confirm-button" onclick="createOrder()">确认订单</button>
-            <button id="back-button" onclick="goBack()">返回</button>
+            <button class="btn btn-primary" id="confirm-button" onclick="createOrder()">
+                <i class="fas fa-check-circle"></i> 确认支付尾款
+            </button>
+            <button class="btn btn-secondary" id="back-button" onclick="goBack()">
+                <i class="fas fa-arrow-left"></i> 返回
+            </button>
         </div>
     </div>
 
@@ -140,6 +546,7 @@
     <script>
         let userId;
         let commodityTitle;
+        let product;
         const urlParams = new URLSearchParams(window.location.search);
         const commodityId = urlParams.get('commodity_id');
         const merchantsId = urlParams.get('merchant_id');
@@ -148,8 +555,10 @@
 
         window.onload = () => {
             if (!commodityId || !merchantsId || !num || !orderId) {
-                alert('缺少必要的商品信息（商品ID、商家ID、商品数量、绑定商品ID），无法创建订单！');
-                window.location.href = 'orders.html';
+                showNotification('缺少必要的商品信息，无法创建订单！', true);
+                setTimeout(() => {
+                    window.location.href = 'orders.html';
+                }, 2000);
                 return;
             }
             loadCommodityDetails(commodityId);
@@ -162,24 +571,25 @@
                 const data = await response.json();
 
                 if (data.error) {
-                    alert(data.error);
+                    showNotification(data.error, true);
                     return;
                 }
 
-                const price = parseFloat(data.price); // 获取商品价格并转换为数字
-                const totalPrice = (price * num); // 计算应付款
+                const price = parseFloat(data.price);
+                const totalPrice = (price * num).toFixed(2);
 
                 document.getElementById('commodity_id_text').textContent = data.Id;
                 document.getElementById('num_text').textContent = num;
                 document.getElementById('commodity_title_text').textContent = data.commodity_title;
-                document.getElementById('commodity_price_text').textContent = price;
-                document.getElementById('total_price_text').textContent = totalPrice; // 显示应付款
+                document.getElementById('commodity_price_text').textContent = price.toFixed(2);
+                document.getElementById('total_price_text').textContent = totalPrice;
                 document.getElementById('merchant_name_text').textContent = data.merchant_name;
 
                 commodityTitle = data.commodity_title;
 
             } catch (error) {
-                showNotification('获取商品信息失败:', error);
+                showNotification('获取商品信息失败', true);
+                console.error('获取商品信息失败:', error);
             }
         }
 
@@ -189,11 +599,11 @@
                 const userInfo = await response.json();
 
                 if (userInfo.error) {
-                    alert(userInfo.error);
+                    showNotification(userInfo.error, true);
                     return;
                 }
 
-                userId = userInfo.Id; // 存储用户 ID
+                userId = userInfo.Id;
                 document.getElementById('consignee_name').value = userInfo.consignee_name || '';
                 document.getElementById('phone_number').value = userInfo.phone_number || '';
                 document.getElementById('delivery_address').value = userInfo.delivery_address || '';
@@ -207,26 +617,34 @@
 
                 document.getElementById('deposit_commodity_id_text').textContent = product.deposit_commodity_id;
 
-                const exists = product.orders.some(order => order.Id === orderId);
+                const exists = product.orders.some(order => order.Id == orderId);
                 if (exists) {
                     console.log(`订单 ID ${orderId} 存在于订单列表中.`);
                 } else {
-                    showNotification(`订单 ID ${orderId} 不存在于订单列表中.`);
-                    document.getElementById('confirm-button').style.display = 'none';
+                    showNotification(`订单 ID ${orderId} 不存在于订单列表中`, true);
+                    document.getElementById('confirm-button').disabled = true;
                 }
                 document.getElementById('deposit_order_id_text').textContent = orderId;
             } catch (error) {
                 console.error('获取用户信息失败:', error);
+                showNotification('获取用户信息失败', true);
             }
         }
 
         function createOrder() {
-            const consigneeName = document.getElementById('consignee_name').value;
-            const phoneNumber = document.getElementById('phone_number').value;
-            const deliveryAddress = document.getElementById('delivery_address').value;
+            const consigneeName = document.getElementById('consignee_name').value.trim();
+            const phoneNumber = document.getElementById('phone_number').value.trim();
+            const deliveryAddress = document.getElementById('delivery_address').value.trim();
 
             if (!consigneeName || !phoneNumber || !deliveryAddress) {
-                alert('请确保所有必填项都已填写。');
+                showNotification('请确保所有必填项都已填写', true);
+                return;
+            }
+
+            // 验证手机号
+            const phonePattern = /^\d{11}$/;
+            if (!phonePattern.test(phoneNumber)) {
+                showNotification('手机号必须是11位数字', true);
                 return;
             }
 
@@ -239,11 +657,16 @@
                 delivery_address: deliveryAddress,
                 consignee_name: consigneeName,
                 phone_number: phoneNumber,
-                order_status: 0, // 初始状态为未支付
-                deposit_order: orderId //定金订单编号
+                order_status: 0,
+                deposit_order: orderId
             };
 
             console.log('即将发送的订单数据:', orderData);
+
+            // 禁用按钮防止重复提交
+            const confirmBtn = document.getElementById('confirm-button');
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 创建中...';
 
             fetch('./php/order/order_create_final_payment.php', {
                 method: 'POST',
@@ -255,31 +678,46 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showNotification('订单创建成功！订单号: ' + data.order_id);
+                    showNotification('尾款订单创建成功！订单号: ' + data.order_id, false);
                     setTimeout(() => {
                         window.location.href = 'orders.html';
-                    }, 1000);
+                    }, 1500);
                 } else {
-                    showNotification('订单创建失败: ' + data.error);
+                    showNotification('订单创建失败: ' + data.error, true);
+                    confirmBtn.disabled = false;
+                    confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> 确认支付尾款';
                 }
             })
             .catch(error => {
-                showNotification('创建订单失败，请稍后再试。');
+                showNotification('创建订单失败，请稍后再试', true);
                 console.error('创建订单失败:', error);
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = '<i class="fas fa-check-circle"></i> 确认支付尾款';
             });
         }
 
         function goBack() {
-            window.history.back(); // 返回到上一页
+            window.history.back();
         }
 
-        function showNotification(message) {
+        function showNotification(message, isError = false) {
             const notification = document.getElementById('notification');
-            notification.textContent = message;
+            
+            notification.classList.remove('error', 'warning');
+            
+            notification.innerHTML = `
+                <i class="fas fa-${isError ? 'exclamation-circle' : 'check-circle'}"></i> ${message}
+            `;
+            
+            if (isError) {
+                notification.classList.add('error');
+            }
+            
             notification.style.display = 'block';
+            
             setTimeout(() => {
                 notification.style.display = 'none';
-            }, 3000); // 3秒后隐藏
+            }, 3000);
         }
     </script>
 </body>

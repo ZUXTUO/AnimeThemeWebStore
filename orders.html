@@ -1,128 +1,394 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>订单列表</title>
+    <title>我的订单 - 订单列表</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body {
+        * {
             margin: 0;
-            font-family: 'Arial', sans-serif;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #7b68ee;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --dark-bg: #1a1a2e;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --border-color: #e0e6ed;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-image: url('img/bg.jpg');
             background-size: cover;
             background-position: center;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
+            background-attachment: fixed;
+            min-height: 100vh;
             padding: 15px;
-            box-sizing: border-box;
+            padding-bottom: 85px;
         }
-        .order-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            margin: 10px auto; /* 上部边距 */
-            margin-bottom: 60px; /* 增加底部边距，确保不重合 */
-            width: 90%;
-            overflow-y: auto;
-        }
-        .header {
+
+        /* 页面头部 */
+        .page-header {
             text-align: center;
-            font-size: 2em;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-            margin-bottom: 10px;
+            margin-bottom: 24px;
+            animation: fadeInDown 0.6s ease;
         }
-        .empty-order-message {
-            font-size: 2em;
+
+        .page-title {
+            font-size: 2.5em;
+            font-weight: 700;
             color: white;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
-            text-align: center;
-            margin: 20px 0;
-            display: none; /* 默认隐藏 */
-        }
-        .order-item {
-            background-color: white;
-            margin: 10px 0;
-            padding: 15px;
-            border-radius: 10px;
+            text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.5);
             display: flex;
             align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1em;
+            text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.4);
+        }
+
+        /* 订单容器 */
+        .orders-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            animation: fadeInUp 0.6s ease;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            display: none;
+        }
+
+        .empty-icon {
+            font-size: 100px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            opacity: 0.3;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .empty-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .empty-description {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+        }
+
+        .empty-action {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 14px 32px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .empty-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(74, 144, 226, 0.4);
+        }
+
+        /* 订单列表 */
+        .orders-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .order-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            animation: slideInLeft 0.4s ease;
+        }
+
+        .order-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .order-header {
+            padding: 16px 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
             justify-content: space-between;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            width: 100%;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
         }
-        .order-item img {
+
+        .order-id {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .order-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .order-body {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 100px 1fr auto;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .order-image-wrapper {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .order-image {
             width: 100px;
             height: 100px;
-            border-radius: 5px;
-            margin-right: 15px;
+            object-fit: cover;
+            border-radius: 12px;
+            transition: transform 0.3s ease;
+        }
+
+        .order-image-wrapper:hover .order-image {
+            transform: scale(1.1);
+        }
+
+        .order-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .order-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
             cursor: pointer;
+            transition: color 0.3s ease;
         }
-        .item-details {
-            flex-grow: 1;
-            margin-right: 15px;
+
+        .order-title:hover {
+            color: var(--primary-color);
         }
-        .item-title {
-            font-size: 1em;
-            font-weight: bold;
-            color: black;
-            margin: 5px 0;
+
+        .order-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
         }
-        .item-name {
-            font-size: 0.9em;
-            color: rgb(0, 0, 0);
-            margin: 5px 0;
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: var(--text-secondary);
         }
-        .item-status {
-            font-size: 0.9em;
-            color: rgb(118, 0, 45);
-            font-weight: bold;
+
+        .meta-item i {
+            color: var(--primary-color);
         }
-        .item-price {
-            font-size: 0.9em;
-            color: rgb(174, 0, 0);
-            font-weight: bold;
+
+        .order-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
         }
-        .view-button {
-            background-color: orange;
+
+        /* 状态颜色 */
+        .status-0 { background: rgba(108, 117, 125, 0.2); color: #6c757d; }
+        .status-1 { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .status-2 { background: rgba(40, 167, 69, 0.2); color: #28a745; }
+        .status-6 { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .status-7 { background: rgba(40, 167, 69, 0.2); color: #28a745; }
+        .status-8 { background: rgba(23, 162, 184, 0.2); color: #17a2b8; }
+        .status-9 { background: rgba(74, 144, 226, 0.2); color: #4a90e2; }
+        .status-10 { background: rgba(40, 167, 69, 0.2); color: #28a745; }
+        .status-11 { background: rgba(40, 167, 69, 0.2); color: #28a745; }
+
+        .order-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
-            border: none;
-            border-radius: 10px;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-size: 0.9em;
-            transition: background-color 0.3s;
         }
-        .view-button:hover {
-            background-color: #ff8c00;
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
         }
-        #home-button {
-            position: fixed; /* 固定在页面底部 */
-            bottom: 20px; /* 距离底部20px */
-            left: 8px; /* 距离左侧8px */
-            width: calc(100% - 16px); /* 宽度100%减去左右间隔 */
-            background-color: #87CEEB;
-            color: rgb(32, 0, 160);
-            border: none;
-            border-radius: 10px;
-            padding: 10px 0; /* 上下内边距 */
-            cursor: pointer;
-            text-align: center;
-            font-size: 1em;
-            transition: background-color 0.3s;
+
+        /* 动画 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        #home-button:hover {
-            background-color: #00BFFF;
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2em;
+            }
+
+            .order-body {
+                grid-template-columns: 80px 1fr;
+                gap: 12px;
+            }
+
+            .order-actions {
+                grid-column: 2;
+                flex-direction: row;
+            }
+
+            .btn {
+                flex: 1;
+                font-size: 13px;
+                padding: 8px 16px;
+            }
+
+            .order-image {
+                width: 80px;
+                height: 80px;
+            }
         }
     </style>
+</head>
+<body>
+    <!-- 页面头部 -->
+    <div class="page-header">
+        <h1 class="page-title">
+            <i class="fas fa-shopping-bag"></i>
+            我的订单
+        </h1>
+        <p class="page-subtitle">My Orders</p>
+    </div>
+
+    <!-- 订单容器 -->
+    <div class="orders-container">
+        <!-- 空状态 -->
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">
+                <i class="fas fa-receipt"></i>
+            </div>
+            <h2 class="empty-title">还没有订单</h2>
+            <p class="empty-description">快去挑选心仪的商品吧！</p>
+            <a href="index.html" class="empty-action">
+                <i class="fas fa-store"></i>
+                去购物
+            </a>
+        </div>
+
+        <!-- 订单列表 -->
+        <div class="orders-list" id="ordersList">
+            <!-- 订单卡片将在这里动态生成 -->
+        </div>
+    </div>
+
+    <!-- 底部导航栏通过 footer.js 自动加载 -->
+    <script src="footer.js"></script>
+
     <script>
         let userId;
 
@@ -131,68 +397,110 @@
             .then(response => response.json())
             .then(data => {
                 if (data.error) {
-                    alert(data.error);
+                    alert('请先登录');
                     window.location.href = 'login.html';
                 } else {
                     userId = data.id;
                     loadOrders(userId);
                 }
             })
-            .catch(error => console.error('检查登录状态失败:', error));
+            .catch(error => {
+                console.error('检查登录状态失败:', error);
+            });
 
         // 加载用户订单
         function loadOrders(userId) {
             fetch(`./php/order/get_orders.php?user_id=${userId}`)
                 .then(response => response.json())
                 .then(orders => {
-                    const orderContainer = document.getElementById('order-container');
-                    const emptyMessage = document.querySelector('.empty-order-message');
-                    orderContainer.innerHTML = '';
+                    const ordersList = document.getElementById('ordersList');
+                    const emptyState = document.getElementById('emptyState');
 
                     if (orders.length === 0) {
-                        orderContainer.style.display = 'none'; // 隐藏订单框
-                        emptyMessage.style.display = 'block'; // 显示空订单信息
+                        emptyState.style.display = 'block';
+                        ordersList.style.display = 'none';
                     } else {
-                        orderContainer.style.display = 'flex'; // 显示订单框
-                        emptyMessage.style.display = 'none'; // 隐藏空订单信息
-                        orders.forEach(order => {
-                            const orderItemDiv = document.createElement('div');
-                            orderItemDiv.className = 'order-item';
-
-                            const imgSrc = `/commodity/${order.merchants_id}/${order.commodity_id}/main.jpg`;
-
-                            // 直接通过 PHP 获取状态名称
-                            fetch(`./php/order/getOrderStatus.php?status=${order.order_status}`)
-                                .then(response => response.json())
-                                .then(statusData => {
-                                    const orderStatus = statusData.statusName || "未知状态";
-
-                                    orderItemDiv.innerHTML = `
-                                        <img src="${imgSrc}" alt="${order.commodity_title}" onclick="location.href='commodity.html?id=${order.commodity_id}'">
-                                        <div class="item-details">
-                                            <div class="item-order-time">下单时间：${order.order_time}</div>
-                                            <div class="item-title">订单号: ${order.Id}</div>
-                                            <div class="item-name">${order.commodity_title}</div>
-                                            <div class="item-status">状态: ${orderStatus}</div>
-                                            <div class="item-price">商品数量: ${order.num}</div>
-                                        </div>
-                                        <button class="view-button" onclick="location.href='order_detail.html?id=${order.Id}'">查看</button>
-                                    `;
-
-                                    orderContainer.appendChild(orderItemDiv);
-                                })
-                                .catch(error => console.error('获取订单状态失败:', error));
-                        });
+                        emptyState.style.display = 'none';
+                        ordersList.style.display = 'flex';
+                        renderOrders(orders);
                     }
                 })
-                .catch(error => console.error('加载订单失败:', error));
+                .catch(error => {
+                    console.error('加载订单失败:', error);
+                });
         }
+
+        // 渲染订单
+        function renderOrders(orders) {
+            const ordersList = document.getElementById('ordersList');
+            ordersList.innerHTML = '';
+
+            orders.forEach((order, index) => {
+                fetch(`./php/order/getOrderStatus.php?status=${order.order_status}`)
+                    .then(response => response.json())
+                    .then(statusData => {
+                        const orderStatus = statusData.statusName || "未知状态";
+                        const imgSrc = `/commodity/${order.merchants_id}/${order.commodity_id}/main.jpg`;
+
+                        const orderCard = document.createElement('div');
+                        orderCard.className = 'order-card';
+                        orderCard.style.animationDelay = `${index * 0.1}s`;
+
+                        orderCard.innerHTML = `
+                            <div class="order-header">
+                                <span class="order-id">
+                                    <i class="fas fa-hashtag"></i> ${order.Id}
+                                </span>
+                                <span class="order-time">
+                                    <i class="far fa-clock"></i> ${order.order_time}
+                                </span>
+                            </div>
+                            
+                            <div class="order-body">
+                                <div class="order-image-wrapper" onclick="location.href='commodity.html?id=${order.commodity_id}'">
+                                    <img src="${imgSrc}" 
+                                         alt="${order.commodity_title}" 
+                                         class="order-image"
+                                         onerror="this.src='commodity/temp.jpg'">
+                                </div>
+                                
+                                <div class="order-details">
+                                    <div class="order-title" onclick="location.href='commodity.html?id=${order.commodity_id}'">
+                                        ${order.commodity_title}
+                                    </div>
+                                    <div class="order-meta">
+                                        <div class="meta-item">
+                                            <i class="fas fa-cubes"></i>
+                                            <span>数量: ${order.num}</span>
+                                        </div>
+                                    </div>
+                                    <span class="order-status status-${order.order_status}">
+                                        <i class="fas fa-info-circle"></i>
+                                        ${orderStatus}
+                                    </span>
+                                </div>
+                                
+                                <div class="order-actions">
+                                    <button class="btn btn-primary" onclick="location.href='order_detail.html?id=${order.Id}'">
+                                        <i class="fas fa-eye"></i>
+                                        查看详情
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+
+                        ordersList.appendChild(orderCard);
+                    })
+                    .catch(error => {
+                        console.error('获取订单状态失败:', error);
+                    });
+            });
+        }
+
+        // 禁用右键
+        document.addEventListener('contextmenu', function(event) {
+            event.preventDefault();
+        });
     </script>
-</head>
-<body>
-    <div class="header">订单列表</div>
-    <div class="empty-order-message">您还没有订单</div> <!-- 空订单提示 -->
-    <div class="order-container" id="order-container"></div>
-    <button id="home-button" onclick="location.href='user.html'">回到个人中心</button>
 </body>
 </html>

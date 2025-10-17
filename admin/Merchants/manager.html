@@ -1,134 +1,560 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>订单管理</title>
+    <title>订单管理 - 商户端</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4a90e2;
+            --secondary-color: #7b68ee;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --dark-bg: #1a1a2e;
+            --card-bg: #16213e;
+            --sidebar-bg: #0f1419;
+            --text-primary: #ffffff;
+            --text-secondary: #b8c1ec;
+            --border-color: #2d3748;
+            --hover-bg: #2d3748;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #2c2c2c;
-            color: #f9f9f9;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, var(--dark-bg) 0%, #0f3460 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
         }
-        h1, h2 {
-            color: #f9f9f9;
-        }
-        #order-list {
-            background: #3c3c3c;
+
+        /* 侧边栏 */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            height: 100vh;
+            width: 260px;
+            background: var(--sidebar-bg);
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
         }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
+
+        .sidebar-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid var(--border-color);
         }
-        th, td {
-            border: 1px solid #555;
-            padding: 10px;
-            text-align: left;
+
+        .sidebar-header i {
+            font-size: 32px;
+            color: var(--primary-color);
         }
-        th {
-            background-color: #4c4c4c;
+
+        .sidebar-header h2 {
+            font-size: 22px;
+            font-weight: 600;
         }
-        .editable {
-            width: 100%;
-            background-color: #444;
-            color: #f9f9f9;
-            border: 1px solid #555;
-            border-radius: 5px;
-            padding: 5px;
+
+        .nav-menu {
+            list-style: none;
         }
-        button {
-            background-color: #28a745;
-            color: white;
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 15px;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: var(--hover-bg);
+            color: var(--text-primary);
+            transform: translateX(5px);
+        }
+
+        .nav-link i {
+            font-size: 18px;
+            width: 20px;
+        }
+
+        /* 主内容 */
+        .main-content {
+            margin-left: 260px;
+            padding: 30px;
+            min-height: 100vh;
+        }
+
+        /* 顶部栏 */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: var(--card-bg);
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* 按钮 */
+        .btn {
+            padding: 10px 20px;
             border: none;
-            padding: 10px;
-            border-radius: 5px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
             cursor: pointer;
-            margin-top: 10px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: #000;
+        }
+
+        .btn-info {
+            background: var(--info-color);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 13px;
+        }
+
+        /* 搜索和过滤器 */
+        .filters-bar {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-label {
+            display: block;
+            margin-bottom: 6px;
+            color: var(--text-secondary);
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .form-input, .form-select {
             width: 100%;
+            padding: 10px 14px;
+            background: var(--dark-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
         }
-        button:hover {
-            background-color: #218838;
+
+        .form-input:focus, .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
         }
+
+        /* 订单卡片 */
+        .orders-container {
+            display: grid;
+            gap: 20px;
+        }
+
+        .order-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .order-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+        }
+
+        .order-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--dark-bg);
+        }
+
+        .order-id {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--primary-color);
+        }
+
+        .order-body {
+            padding: 20px;
+        }
+
+        .order-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .order-field {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .field-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field-value {
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+
+        .order-editable {
+            background: var(--dark-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .order-editable:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .order-editable.input {
+            padding: 8px 12px;
+        }
+
+        .order-editable.select {
+            padding: 8px 12px;
+        }
+
+        /* 徽章 */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-status-0 { background: rgba(108, 117, 125, 0.2); color: #6c757d; }
+        .badge-status-1 { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .badge-status-2 { background: rgba(40, 167, 69, 0.2); color: #28a745; }
+        .badge-status-6 { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .badge-status-7 { background: rgba(40, 167, 69, 0.2); color: #28a745; }
+        .badge-status-8 { background: rgba(23, 162, 184, 0.2); color: #17a2b8; }
+        .badge-status-9 { background: rgba(74, 144, 226, 0.2); color: #4a90e2; }
+        .badge-status-10 { background: rgba(40, 167, 69, 0.2); color: #28a745; }
+        .badge-status-11 { background: rgba(40, 167, 69, 0.2); color: #28a745; }
+        .badge-status-12 { background: rgba(220, 53, 69, 0.2); color: #dc3545; }
+        .badge-status-13 { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .badge-status-14 { background: rgba(220, 53, 69, 0.2); color: #dc3545; }
+        .badge-status-15 { background: rgba(108, 117, 125, 0.2); color: #6c757d; }
+        .badge-status-16 { background: rgba(255, 193, 7, 0.2); color: #ffc107; }
+        .badge-status-17 { background: rgba(220, 53, 69, 0.2); color: #dc3545; }
+
+        /* 图片画廊 */
         .image-gallery {
             display: flex;
+            gap: 10px;
             flex-wrap: wrap;
-            margin-top: 10px;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(0, 0, 0, 0.2);
         }
-        .image-gallery img {
-            width: 100px;
-            height: auto;
-            margin-right: 10px;
+
+        .gallery-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
             cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid var(--border-color);
         }
-        #pagination {
+
+        .gallery-image:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+        }
+
+        /* 订单操作 */
+        .order-actions {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        /* 分页 */
+        .pagination {
             display: flex;
             justify-content: center;
-            margin-top: 20px;
-            gap: 20px; /* 设置按钮之间的间隔 */
+            align-items: center;
+            gap: 8px;
+            padding: 24px;
+            margin-top: 24px;
         }
-        .page-item {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 5px;
+
+        .pagination button {
+            min-width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-primary);
+            border-radius: 8px;
             cursor: pointer;
-            margin: 0 5px;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            font-weight: 600;
         }
-        .page-item:hover {
-            background-color: #218838;
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--hover-bg);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
         }
-        .page-item.active {
-            background-color: #218838;
-            font-weight: bold;
+
+        .pagination button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .pagination .ellipsis {
+            color: var(--text-secondary);
+            padding: 0 8px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .top-bar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .top-actions {
+                width: 100%;
+                flex-direction: column;
+            }
+
+            .filter-row {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+
+            .order-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 20px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <h1>订单管理</h1>
-    <div id="order-list">
-        
-        <div style="display: flex; align-items: center; width: 100%;">
-            <label for="search-filter" style="margin-right: 5px; color: #333;">搜索:</label>
-            <select id="search-type" style="margin-right: 10px; padding: 10px; border-radius: 5px; border: 1px solid #ccc; width: 120px;">
-                <option value="orderId">订单号</option>
-                <option value="phoneNumber">手机号</option>
-                <option value="commodityTitle">商品名</option>
-                <option value="userId">用户 ID</option>
-                <option value="consigneeName">收件人姓名</option>
-                <option value="deliveryAddress">收货地址</option>
-            </select>
-            <input type="text" id="search-input" placeholder="请输入搜索内容"
-                   style="padding: 12px; border-radius: 5px; border: 1px solid #ccc; flex: 1; 
-                          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); transition: border 0.3s; 
-                          margin-right: 10px;">
-            <button style="padding: 8px 12px; border: none; border-radius: 5px; 
-                          background-color: #4285f4; color: white; cursor: pointer; 
-                          transition: background-color 0.3s; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); font-size: 14px;"
-                    onmouseover="this.style.backgroundColor='#357ae8';" 
-                    onmouseout="this.style.backgroundColor='#4285f4';" 
-                    onclick="searchOrders()">搜索</button>
+    <!-- 侧边栏 -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <i class="fas fa-store"></i>
+            <h2>商户端</h2>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-box"></i>
+                    <span>商品管理</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="manager.html" class="nav-link active">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>订单管理</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="order_time_management.html" class="nav-link" target="_blank">
+                    <i class="fas fa-robot"></i>
+                    <span>自动管理</span>
+                </a>
+            </li>
+            <li class="nav-item" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <a href="#" class="nav-link" onclick="logout(); return false;">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>退出登录</span>
+                </a>
+            </li>
+        </ul>
+    </aside>
+
+    <!-- 主内容 -->
+    <main class="main-content">
+        <div class="top-bar">
+            <h1 class="page-title">
+                <i class="fas fa-clipboard-list"></i> 订单管理
+            </h1>
+            <div class="top-actions">
+                <button class="btn btn-success" onclick="exportOrders()">
+                    <i class="fas fa-file-export"></i> 导出订单
+                </button>
+            </div>
         </div>
         
-        
-        <h2>订单列表</h2>
-        <label for="order-status-filter">筛选订单状态：</label>
-        <select id="order-status-filter" onchange="filterOrders()">
-            <option value="">所有状态</option>
+        <!-- 搜索和过滤 -->
+        <div class="filters-bar">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label class="filter-label">订单状态</label>
+                    <select id="order-status-filter" class="form-select" onchange="filterOrders()">
+                        <option value="">全部状态</option>
             <option value="0">未支付</option>
             <option value="1">已支付，审核中</option>
             <option value="2">已支付，审核成功</option>
-            <!-- <option value="3">确认成品信息</option> -->
-            <!-- <option value="4">已确认成品信息</option> -->
-            <!-- <option value="5">待支付尾款信息</option> -->
-            <option value="6">已支付尾款信息，审核中</option>
-            <option value="7">已支付尾款信息，审核成功</option>
+                        <option value="6">已支付尾款，审核中</option>
+                        <option value="7">已支付尾款，审核成功</option>
             <option value="8">待发货</option>
             <option value="9">已发货</option>
             <option value="10">已送达</option>
@@ -140,32 +566,38 @@
             <option value="16">已支付，但退款中</option>
             <option value="17">已支付，退款成功</option>
         </select>
-        <button id="export-orders" onclick="exportOrders()">导出订单</button>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">搜索类型</label>
+                    <select id="search-type" class="form-select">
+                        <option value="orderId">订单号</option>
+                        <option value="phoneNumber">手机号</option>
+                        <option value="commodityTitle">商品名</option>
+                        <option value="userId">用户 ID</option>
+                        <option value="consigneeName">收件人姓名</option>
+                        <option value="deliveryAddress">收货地址</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label class="filter-label">搜索内容</label>
+                    <input type="text" id="search-input" class="form-input" placeholder="请输入搜索内容...">
+                </div>
+                <div class="filter-group" style="display: flex; align-items: flex-end;">
+                    <button class="btn btn-primary" onclick="searchOrders()" style="width: 100%;">
+                        <i class="fas fa-search"></i> 搜索
+                    </button>
+                </div>
+            </div>
+        </div>
 
-        <button style="background-color: #dc3545; color: white;" onclick="location.href='index.html'">商品管理</button>
-        <table>
-            <thead>
-                <tr>
-                    <th>订单编号</th>
-                    <th>用户 ID</th>
-                    <th>商品代号</th>
-                    <th>商品名</th>
-                    <th>数量</th>
-                    <th>状态</th>
-                    <th>下单时间</th>
-                    <th>收件人姓名</th>
-                    <th>手机号</th>
-                    <th>收货地址</th>
-                    <th>运单号</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody id="orders"></tbody>
-        </table>
-        <div id="pagination"></div>
-        <button style="background-color: #dc3545; color: white;" onclick="window.open('order_time_management.html', '_blank')">自动管理平台(一定要在后台给它留一个窗口)</button>
-        <button style="background-color: #dc8e35; color: white;" onclick="logout()">登出</button>
+        <!-- 订单列表 -->
+        <div id="orders" class="orders-container">
+            <!-- 订单卡片将在这里动态生成 -->
     </div>
+
+        <!-- 分页 -->
+        <div id="pagination" class="pagination"></div>
+    </main>
 
     <script>
         let currentPage = 1;
@@ -191,50 +623,22 @@
             const orderList = document.getElementById('orders');
             orderList.innerHTML = '';
 
+            if (orders.length === 0) {
+                orderList.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <h3>暂无订单</h3>
+                        <p>当前没有符合条件的订单</p>
+                    </div>
+                `;
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
             for (const order of orders) {
-                //console.warn(order);
-                const row = document.createElement('tr');
-                row.setAttribute('data-order-id', order.Id);
-                row.innerHTML = `
-                    <td>${order.Id}</td>
-                    <td>${order.user_id}</td>
-                    <td>${order.commodity_id}</td>
-                    <td>${order.commodity_title}</td>
-                    <td>${order.num}</td>
-                    <td>
-                        <select class="editable" onchange="updateOrder(${order.Id}, 'order_status', this.value)">
-                            ${getOrderStatusOptions(order.order_status)}
-                        </select>
-                    </td>
-                    <td>${order.order_time}</td>
-                    <td><input type="text" class="editable" value="${order.consignee_name}" onchange="updateOrder(${order.Id}, 'consignee_name', this.value)"></td>
-                    <td><input type="text" class="editable" value="${order.phone_number}" onchange="updateOrder(${order.Id}, 'phone_number', this.value)"></td>
-                    <td><input type="text" class="editable" value="${order.delivery_address}" onchange="updateOrder(${order.Id}, 'delivery_address', this.value)"></td>
-                    <td><input type="text" class="editable" value="${order.waybill_number}" onchange="updateOrder(${order.Id}, 'waybill_number', this.value)"></td>
-                    <td>
-                        <button onclick="syncOrder(${order.Id})">同步</button>
-                        ${(order.order_status == 1 || order.order_status == 2) ? `<button onclick="refundOrder(${order.Id})">退款</button>` : ''}
-                </td>`;
-
-                orderList.appendChild(row);
-
                 const images = await loadImages(order.Id);
-                const imageRow = document.createElement('tr');
-                const imageCell = document.createElement('td');
-                imageCell.colSpan = 12;
-                const imageGallery = document.createElement('div');
-                imageGallery.className = 'image-gallery';
-
-                images.forEach(image => {
-                    const img = document.createElement('img');
-                    img.src = `../../order/${order.Id}/${image}`;
-                    img.onclick = () => window.open(img.src);
-                    imageGallery.appendChild(img);
-                });
-
-                imageCell.appendChild(imageGallery);
-                imageRow.appendChild(imageCell);
-                orderList.appendChild(imageRow);
+                const card = createOrderCard(order, images);
+                orderList.appendChild(card);
             }
 
             generatePagination(Math.ceil(totalOrders / itemsPerPage));
@@ -246,19 +650,152 @@
             return images;
         }
 
-        function refundOrder(orderId) {
-            alert('退款功能尚未实现', orderId);
+        function createOrderCard(order, images) {
+            const card = document.createElement('div');
+            card.classList.add('order-card');
+            
+            const statusBadge = getStatusBadge(order.order_status);
+            
+            card.innerHTML = `
+                <div class="order-header">
+                    <div class="order-id">
+                        <i class="fas fa-hashtag"></i> 订单编号: ${order.Id}
+                    </div>
+                    ${statusBadge}
+                </div>
+
+                <div class="order-body">
+                    <div class="order-grid">
+                        <div class="order-field">
+                            <span class="field-label"><i class="fas fa-user"></i> 用户 ID</span>
+                            <span class="field-value">${order.user_id}</span>
+                        </div>
+                        <div class="order-field">
+                            <span class="field-label"><i class="fas fa-box"></i> 商品代号</span>
+                            <span class="field-value">${order.commodity_id}</span>
+                        </div>
+                        <div class="order-field">
+                            <span class="field-label"><i class="fas fa-tag"></i> 商品名</span>
+                            <span class="field-value">${order.commodity_title}</span>
+                        </div>
+                        <div class="order-field">
+                            <span class="field-label"><i class="fas fa-sort-numeric-up"></i> 数量</span>
+                            <span class="field-value">${order.num}</span>
+                        </div>
+                        <div class="order-field">
+                            <span class="field-label"><i class="fas fa-calendar"></i> 下单时间</span>
+                            <span class="field-value">${order.order_time}</span>
+                        </div>
+                        <div class="order-field">
+                            <span class="field-label"><i class="fas fa-info-circle"></i> 订单状态</span>
+                            <select class="order-editable select" data-order-id="${order.Id}" data-field="order_status" onchange="updateOrder(${order.Id}, 'order_status', this.value)">
+                                ${getOrderStatusOptions(order.order_status)}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="order-grid">
+                        <div class="order-field">
+                            <span class="field-label"><i class="fas fa-user-tag"></i> 收件人姓名</span>
+                            <input type="text" class="order-editable input" value="${order.consignee_name}" 
+                                   data-order-id="${order.Id}" data-field="consignee_name" 
+                                   onchange="updateOrder(${order.Id}, 'consignee_name', this.value)">
+                        </div>
+                        <div class="order-field">
+                            <span class="field-label"><i class="fas fa-phone"></i> 手机号</span>
+                            <input type="text" class="order-editable input" value="${order.phone_number}" 
+                                   data-order-id="${order.Id}" data-field="phone_number" 
+                                   onchange="updateOrder(${order.Id}, 'phone_number', this.value)">
+                        </div>
+                        <div class="order-field">
+                            <span class="field-label"><i class="fas fa-map-marker-alt"></i> 收货地址</span>
+                            <input type="text" class="order-editable input" value="${order.delivery_address}" 
+                                   data-order-id="${order.Id}" data-field="delivery_address" 
+                                   onchange="updateOrder(${order.Id}, 'delivery_address', this.value)">
+                        </div>
+                        <div class="order-field">
+                            <span class="field-label"><i class="fas fa-truck"></i> 运单号</span>
+                            <input type="text" class="order-editable input" value="${order.waybill_number}" 
+                                   data-order-id="${order.Id}" data-field="waybill_number" 
+                                   onchange="updateOrder(${order.Id}, 'waybill_number', this.value)">
+                        </div>
+                    </div>
+                </div>
+
+                ${images.length > 0 ? `
+                    <div class="image-gallery">
+                        ${images.map(image => `
+                            <img src="../../order/${order.Id}/${image}" 
+                                 class="gallery-image" 
+                                 onclick="window.open(this.src)" 
+                                 title="点击查看大图">
+                        `).join('')}
+                    </div>
+                ` : ''}
+
+                <div class="order-actions">
+                    <button class="btn btn-success btn-sm" onclick="syncOrder(${order.Id})">
+                        <i class="fas fa-save"></i> 保存
+                    </button>
+                    ${(order.order_status == 1 || order.order_status == 2) ? `
+                        <button class="btn btn-danger btn-sm" onclick="refundOrder(${order.Id})">
+                            <i class="fas fa-undo"></i> 退款
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+
+            return card;
         }
 
+        function getStatusBadge(status) {
+            const statusMap = {
+                0: "未支付",
+                1: "已支付，审核中",
+                2: "已支付，审核成功",
+                6: "已支付尾款，审核中",
+                7: "已支付尾款，审核成功",
+                8: "待发货",
+                9: "已发货",
+                10: "已送达",
+                11: "已收货",
+                12: "超时未支付，订单关闭",
+                13: "已售后",
+                14: "已退款",
+                15: "订单关闭",
+                16: "已支付，但退款中",
+                17: "已支付，退款成功"
+            };
+
+            const statusIcon = {
+                0: "clock",
+                1: "hourglass-half",
+                2: "check-circle",
+                6: "hourglass-half",
+                7: "check-circle",
+                8: "box",
+                9: "shipping-fast",
+                10: "check-double",
+                11: "thumbs-up",
+                12: "times-circle",
+                13: "undo",
+                14: "money-bill-wave",
+                15: "ban",
+                16: "hourglass-half",
+                17: "check-circle"
+            };
+
+            return `<span class="badge badge-status-${status}">
+                <i class="fas fa-${statusIcon[status] || 'question'}"></i>
+                ${statusMap[status] || '未知状态'}
+            </span>`;
+        }
 
         function getOrderStatusOptions(selectedStatus) {
             const statusMap = {
                 0: "未支付",
                 1: "已支付，审核中",
                 2: "已支付，审核成功",
-                // 3: "确认成品信息",
-                // 4: "已确认成品信息",
-                // 5: "待支付尾款信息",
                 6: "已支付尾款信息，审核中",
                 7: "已支付尾款信息，审核成功",
                 8: "待发货",
@@ -304,82 +841,96 @@
                   alert(result.message);
                   if (result.success) {
                       delete orderUpdates[orderId];
+                      loadOrders(localStorage.getItem('merchantId'));
                   }
               });
         }
 
-        // 生成分页
+        function refundOrder(orderId) {
+            if (confirm('确定要退款此订单吗？')) {
+                alert('退款功能尚未实现');
+            }
+        }
+
         function generatePagination(totalPages) {
             const paginationContainer = document.getElementById('pagination');
-            paginationContainer.innerHTML = ''; // 清空现有的分页内容
+            paginationContainer.innerHTML = '';
 
-            // 创建上一个按钮
+            if (totalPages <= 1) return;
+
+            // 上一页
             const prevButton = document.createElement('button');
-            prevButton.innerText = '«';
-            prevButton.disabled = currentPage === 1; // 当前页为第一页时禁用
-            prevButton.onclick = () => changePage(currentPage - 1); // 点击时切换到上一页
-			prevButton.style.fontWeight = 'bold'; // 加粗文本
-			prevButton.style.fontSize = '18px'; // 设置字体大小
+            prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = () => changePage(currentPage - 1);
+            prevButton.title = '上一页';
             paginationContainer.appendChild(prevButton);
 
-            // 渲染页码按钮的函数
-            const renderPageButton = (page) => {
-                const button = document.createElement('button');
-                button.innerText = page; // 设置按钮文本为页码
-                button.onclick = () => changePage(page); // 点击时切换到对应页
-                button.style.fontWeight = 'bold'; // 加粗文本
-                button.style.fontSize = '18px'; // 设置字体大小
-                if (page === currentPage) {
-                    button.disabled = true; // 当前页禁用
-                }
-                paginationContainer.appendChild(button); // 添加按钮到分页容器
-            };
+            const range = 2;
 
-            const range = 2; // 当前页周围显示的页码数量
-
-            // 显示第一页
+            // 第一页
             if (currentPage > 1) {
-                const firstPageButton = document.createElement('button');
-                firstPageButton.innerText = '第一页'; // 设置按钮文本为"第一页"
-                firstPageButton.onclick = () => changePage(1); // 点击时切换到第一页
-                firstPageButton.style.fontWeight = 'bold'; // 加粗文本
-                firstPageButton.style.fontSize = '18px'; // 设置字体大小
-                paginationContainer.appendChild(firstPageButton); // 添加按钮到分页容器
+                const firstButton = document.createElement('button');
+                firstButton.innerText = '1';
+                firstButton.onclick = () => changePage(1);
+                paginationContainer.appendChild(firstButton);
 
-                if (currentPage > range + 1) {
+                if (currentPage > range + 2) {
                     const ellipsis = document.createElement('span');
-                    ellipsis.innerText = '...'; // 省略号
+                    ellipsis.className = 'ellipsis';
+                    ellipsis.innerText = '...';
                     paginationContainer.appendChild(ellipsis);
                 }
             }
 
-            // 显示当前页和附近的页码
-            for (let i = Math.max(1, currentPage - range); i <= Math.min(totalPages, currentPage + range); i++) {
-                renderPageButton(i);
+            // 当前页附近
+            for (let i = Math.max(2, currentPage - range); i <= Math.min(totalPages - 1, currentPage + range); i++) {
+                const button = document.createElement('button');
+                button.innerText = i;
+                button.onclick = () => changePage(i);
+                if (i === currentPage) {
+                    button.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+                    button.style.borderColor = 'transparent';
+                    button.disabled = true;
+                }
+                paginationContainer.appendChild(button);
             }
 
-            // 显示最后一页
+            // 最后一页
             if (currentPage < totalPages) {
-                if (currentPage < totalPages - range) {
+                if (currentPage < totalPages - range - 1) {
                     const ellipsis = document.createElement('span');
-                    ellipsis.innerText = '...'; // 省略号
+                    ellipsis.className = 'ellipsis';
+                    ellipsis.innerText = '...';
                     paginationContainer.appendChild(ellipsis);
                 }
-                const lastPageButton = document.createElement('button');
-                lastPageButton.innerText = '最后一页'; // 设置按钮文本为"最后一页"
-                lastPageButton.onclick = () => changePage(totalPages); // 点击时切换到最后一页
-                lastPageButton.style.fontWeight = 'bold'; // 加粗文本
-                lastPageButton.style.fontSize = '18px'; // 设置字体大小
-                paginationContainer.appendChild(lastPageButton); // 添加按钮到分页容器
+
+                if (totalPages > 1) {
+                    const lastButton = document.createElement('button');
+                    lastButton.innerText = totalPages;
+                    lastButton.onclick = () => changePage(totalPages);
+                    if (totalPages === currentPage) {
+                        lastButton.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+                        lastButton.style.borderColor = 'transparent';
+                        lastButton.disabled = true;
+                    }
+                    paginationContainer.appendChild(lastButton);
+                }
+            } else if (totalPages === 1) {
+                const firstButton = document.createElement('button');
+                firstButton.innerText = '1';
+                firstButton.style.background = 'linear-gradient(135deg, var(--primary-color), var(--secondary-color))';
+                firstButton.style.borderColor = 'transparent';
+                firstButton.disabled = true;
+                paginationContainer.appendChild(firstButton);
             }
 
-            // 创建下一个按钮
+            // 下一页
             const nextButton = document.createElement('button');
-            nextButton.innerText = '»';
-            nextButton.disabled = currentPage === totalPages; // 当前页为最后一页时禁用
-            nextButton.onclick = () => changePage(currentPage + 1); // 点击时切换到下一页
-            nextButton.style.fontWeight = 'bold'; // 加粗文本
-            nextButton.style.fontSize = '18px'; // 设置字体大小
+            nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.onclick = () => changePage(currentPage + 1);
+            nextButton.title = '下一页';
             paginationContainer.appendChild(nextButton);
         }
 
@@ -387,6 +938,7 @@
             currentPage = newPage;
             const merchantId = localStorage.getItem('merchantId');
             loadOrders(merchantId);
+            window.scrollTo(0, 0);
         }
 
         function filterOrders() {
@@ -396,23 +948,26 @@
             loadOrders(merchantId);
         }
 
-        function exportOrders() {
-            const merchantId = localStorage.getItem('merchantId');
-            const status = selectedStatus;
-            const url = `../../php/admin/exportOrders.php?merchantId=${merchantId}&status=${status}`;
-            window.location.href = url; // 直接跳转到导出 URL
-        }
-
         function searchOrders() {
             const searchType = document.getElementById('search-type').value;
             const searchInput = document.getElementById('search-input').value;
             const merchantId = localStorage.getItem('merchantId');
+            currentPage = 1;
             loadOrders(merchantId, searchType, searchInput);
         }
 
+        function exportOrders() {
+            const merchantId = localStorage.getItem('merchantId');
+            const status = selectedStatus;
+            const url = `../../php/admin/exportOrders.php?merchantId=${merchantId}&status=${status}`;
+            window.location.href = url;
+        }
+
         function logout() {
+            if (confirm('确定要退出登录吗？')) {
             localStorage.removeItem('merchantId');
             window.location.href = 'index.html';
+            }
         }
     </script>
 </body>
